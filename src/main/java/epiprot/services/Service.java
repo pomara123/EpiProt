@@ -1,8 +1,11 @@
 package epiprot.services;
 
-public abstract class Service {
+import java.util.TimerTask;
+
+public abstract class Service extends TimerTask {
 	
-	public final String FASTAFILEPATH = System.getProperty("user.dir").toString() + "/";
+	// Directory of the project: Users/Patrick/Documents/workspace/epiprot/
+	public final static String SERVICEFILEPATH = System.getProperty("user.dir").toString() + "/";
 	
 	public Service () {}
 }

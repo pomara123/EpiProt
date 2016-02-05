@@ -35,13 +35,9 @@ public class Protein {
 	}
 	
 	public void initUniprotService() {
-		try {
-			UniprotService uniprotService = new UniprotService(acc);
-			this.uniprotDoc = uniprotService.getDocument();
-		} catch (DocumentNullException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		UniprotService uniprotService = new UniprotService(acc);
+		uniprotService.run();
+		this.uniprotDoc = uniprotService.getDocument();
 	}
 	
 	//returns the NodeList with the tag name
@@ -207,9 +203,6 @@ public class Protein {
 		    }
 		    br.close();
 		    isoformSequence = isoformSequence.replaceAll("[\\r\\n]", "");
-		} catch (DocumentNullException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -239,6 +232,7 @@ public class Protein {
     
     public static void main (String [] args) {
     	Protein protein = new Protein ("Q99523");
-    	System.out.println(protein.getIsoformSequence("2"));
+    	protein.initUniprotService();
+    	System.out.println(protein.getSequence());
     }
 }

@@ -22,19 +22,15 @@ public class UniprotService extends Service {
 	public String id;
 	public Document doc;
 	
-	public UniprotService (String id) throws DocumentNullException {
+	public UniprotService (String id) {
 		this.id = id;
-		this.doc = getDocument();
-		if (doc == null) {
-			throw new DocumentNullException("UniprotService.java returning null.");
-		}
 	}
 
 	public File fetchFastaFile() {
 		File file = null;
     	try {
 			URL url = new URL("http://www.uniprot.org/uniprot/"+id+".fasta");
-			file = new File(FASTAFILEPATH + id + ".fasta");
+			file = new File(SERVICEFILEPATH + id + ".fasta");
 			PrintWriter writer = new PrintWriter(file);
 			writer.close();
 			FileUtils.copyURLToFile(url, file);
@@ -47,10 +43,11 @@ public class UniprotService extends Service {
 		}   	
     	return file;
 	}
-	
-	public Document getDocument() {
-		Document doc = null;
-    	try {
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
 	        URL url = new URL("http://www.uniprot.org/uniprot/"+id+".xml");
 	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	        DocumentBuilder db = dbf.newDocumentBuilder();
@@ -64,18 +61,14 @@ public class UniprotService extends Service {
     	} catch (SAXException e) {
     		e.printStackTrace();
     	}
-        return doc;
+	}
+	
+	public Document getDocument() {
+		return doc;
 	}
 	
 	public static void main (String[]args) {
-		UniprotService uniprot;
-		try {
-			uniprot = new UniprotService("Q99523");
-			System.out.println(uniprot.FASTAFILEPATH);
-
-		} catch (DocumentNullException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		UniprotService uniprot = new UniprotService("Q99523");
+		System.out.println(uniprot.SERVICEFILEPATH);
 	}
 }
