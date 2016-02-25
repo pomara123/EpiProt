@@ -230,6 +230,11 @@ public class Protein {
 		return "";
     }
     
+    public File getFastaFile() {
+    	UniprotService us = new UniprotService(acc);
+    	return us.fetchFastaFile();
+    }
+    
     public static void main (String [] args) {
     	Protein protein = new Protein ("Q99523");
     	protein.initUniprotService();

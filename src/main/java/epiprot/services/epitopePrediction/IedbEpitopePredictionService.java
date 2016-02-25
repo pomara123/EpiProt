@@ -46,9 +46,7 @@ public class IedbEpitopePredictionService extends Service {
             BufferedReader stdError = new BufferedReader(new
                  InputStreamReader(p.getErrorStream()));
             
-            while ((s = stdInput.readLine()) != null) {
-                chart = chart + s + "\n";
-            }
+           
              
             /* read any errors from the attempted command
             System.out.println("Here is the standard error of the command (if any):\n");
