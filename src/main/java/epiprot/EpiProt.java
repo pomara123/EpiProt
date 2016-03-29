@@ -10,5 +10,6 @@ public class EpiProt {
     	Model model = new Model();
     	Presenter presenter = new Presenter(view,model);
     	view.setVisible(true);
+    	//presenter.display();;
     }
 }

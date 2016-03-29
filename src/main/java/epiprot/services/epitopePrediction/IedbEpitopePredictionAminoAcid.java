@@ -1,5 +1,7 @@
 package epiprot.services.epitopePrediction;
 
+import java.util.Comparator;
+
 import epiprot.AminoAcid;
 
 public class IedbEpitopePredictionAminoAcid extends AminoAcid {
@@ -8,6 +10,7 @@ public class IedbEpitopePredictionAminoAcid extends AminoAcid {
 	private int end;
 	private String peptide;
 	private double score;
+	private int relativeScore;
 	
 	public IedbEpitopePredictionAminoAcid(){}
 
@@ -34,5 +37,13 @@ public class IedbEpitopePredictionAminoAcid extends AminoAcid {
 	}
 	public void setScore(double score) {
 		this.score = score;
+	}
+
+	public int getRelativeScore() {
+		return relativeScore;
+	}
+
+	public void setRelativeScore(int relativeScore) {
+		this.relativeScore = relativeScore;
 	}
 }

@@ -13,6 +13,7 @@ import javax.swing.Action;
 public class SelectProteinView extends JPanel implements SelectProteinPresenter.View {
 	
 	private String proteinName;
+	private JCheckBox checkBox;
 
 	public SelectProteinView(String proteinName) {
 		this.proteinName = proteinName;
@@ -27,8 +28,19 @@ public class SelectProteinView extends JPanel implements SelectProteinPresenter.
 		FlowLayout flowLayout = new FlowLayout(FlowLayout.LEFT, 5, 5);
 		setLayout(flowLayout);
 		
-		JCheckBox checkBox = new JCheckBox(proteinName);
+		checkBox = new JCheckBox(proteinName);
 		add(checkBox);
+	}
+
+	@Override
+	public JCheckBox checkBox() {
+		// TODO Auto-generated method stub
+		return checkBox;
+	}
+	
+	@Override
+	public String getUniProtAcc() {
+		return proteinName.split("\\s+")[0];
 	}
 	
 }

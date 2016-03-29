@@ -106,33 +106,37 @@ public class Protein {
     //returns the common name of the protein organism
     public String getOrganism() {
     	String organismName = "";
-		NodeList organismList = getNodeList("organism");
-		for (int j = 0; j < organismList.getLength(); j++) {
-	    	Node organismNode = organismList.item(j);	    	
-	    	NodeList organismPropertyList = organismNode.getChildNodes();
-	    	for (int i = 0; i < organismPropertyList.getLength(); i++) {
-		    	Node propertyNode = organismPropertyList.item(i);		        
-	            if (propertyNode.getNodeType()==Node.ELEMENT_NODE && propertyNode.getNodeName().equals("name")) {
-	            	Element property = (Element) propertyNode;
-	            	String type = property.getAttribute("type");
-	            	if (type.equals("common")){       	    	 
-	            		organismName = property.getTextContent();
-	            	}
-	            }
-	    	}
-		}
+    	try {
+			NodeList organismList = getNodeList("organism");
+			for (int j = 0; j < organismList.getLength(); j++) {
+		    	Node organismNode = organismList.item(j);	    	
+		    	NodeList organismPropertyList = organismNode.getChildNodes();
+		    	for (int i = 0; i < organismPropertyList.getLength(); i++) {
+			    	Node propertyNode = organismPropertyList.item(i);		        
+		            if (propertyNode.getNodeType()==Node.ELEMENT_NODE && propertyNode.getNodeName().equals("name")) {
+		            	Element property = (Element) propertyNode;
+		            	String type = property.getAttribute("type");
+		            	if (type.equals("common")){       	    	 
+		            		organismName = property.getTextContent();
+		            	}
+		            }
+		    	}
+			}
+    	} catch (NullPointerException e) {}
 		return organismName;
     }
     
     //returns the database the protein is in i.e. Swiss-Prot
     public String getDatabase() {
     	String database = "";
-    	NodeList entryList = getNodeList("entry");
-		Node entryNode = entryList.item(0);
-        if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
-            Element entry = (Element) entryNode;
-            database = entry.getAttribute("dataset");
-        }
+    	try {
+	    	NodeList entryList = getNodeList("entry");
+			Node entryNode = entryList.item(0);
+	        if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
+	            Element entry = (Element) entryNode;
+	            database = entry.getAttribute("dataset");
+	        }
+    	} catch (NullPointerException e){}
 		return database;
     }
     

@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 import epiprot.Protein;
 import epiprot.services.Service;
@@ -26,6 +30,7 @@ public class IedbEpitopePredictionService extends Service {
 	public IedbEpitopePredictionService(String sequence, String epitopePredictionMethod, int windowSize) {
 		this.sequence = sequence;
 		this.epitopePredictionMethod = epitopePredictionMethod;
+		System.out.println(sequence);
 		this.windowSize = windowSize;
 	}
 	
@@ -36,7 +41,10 @@ public class IedbEpitopePredictionService extends Service {
     	 
         try {
             // using the Runtime exec method:
-        	String cmd = "curl http://tools-api.iedb.org/tools_api/bcell/ --data method=" + epitopePredictionMethod + "&sequence_text=" + sequence +"&window_size=" + windowSize;
+        	String cmd = "";
+        	
+        	cmd = "curl http://tools-api.iedb.org/tools_api/bcell/ --data method=" + epitopePredictionMethod + "&sequence_text=" + sequence +"&window_size=" + windowSize;
+        	
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor();
              
@@ -46,7 +54,14 @@ public class IedbEpitopePredictionService extends Service {
             BufferedReader stdError = new BufferedReader(new
                  InputStreamReader(p.getErrorStream()));
             
-           
+            
+            Stream<String> lines = stdInput.lines();
+            Iterator it = lines.iterator();
+            while(it.hasNext()) {
+            	//System.out.println(it.next());
+            	chart = chart + it.next() + "\n";
+            }
+            System.out.println(chart);
              
             /* read any errors from the attempted command
             System.out.println("Here is the standard error of the command (if any):\n");
@@ -93,11 +108,50 @@ public class IedbEpitopePredictionService extends Service {
     			isLine = true;
     		}    		
     	}
-    	return aaList;
+    	return calcDisplayedScores(aaList);
+    }
+    
+    private ArrayList<IedbEpitopePredictionAminoAcid> calcDisplayedScores(ArrayList<IedbEpitopePredictionAminoAcid> aaList) {
+    	ArrayList<IedbEpitopePredictionAminoAcid> sortedAAList = new ArrayList<IedbEpitopePredictionAminoAcid>(aaList);
+    	Collections.sort(sortedAAList, new Comparator<IedbEpitopePredictionAminoAcid>(){
+    	     public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
+    	         if(o1.getScore() == o2.getScore())
+    	             return 0;
+    	         return o1.getScore() < o2.getScore() ? -1 : 1;
+    	     }
+    	});
+    	
+    	int tenth = aaList.size()/10;
+    	int remainder = aaList.size()%10;
+    	
+    	for(int i = 0; i < 10; i++) {
+    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+    			sortedAAList.get(j).setRelativeScore(i);
+    		}
+    	}
+    	
+    	for (int i = aaList.size()-1; i >= aaList.size()-remainder; i--) {
+    		sortedAAList.get(i).setRelativeScore(9);
+    	}
+    	
+    	Collections.sort(sortedAAList, new Comparator<IedbEpitopePredictionAminoAcid>(){
+   	     public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
+   	         if(o1.getPosition() == o2.getPosition())
+   	             return 0;
+   	         return o1.getPosition() < o2.getPosition() ? -1 : 1;
+   	     }
+    	});
+    	
+    	return sortedAAList; 
     }
     
     public static void main (String[]args) {
     	Protein protein = new Protein("Q99523", true);
-    	//IedbEpitopePredictionService ieps = new IedbEpitopePredictionService(protein.getSequence(),)
+    	IedbEpitopePredictionService ieps = new IedbEpitopePredictionService(protein.getSequence(),"Emini");
+    	ieps.run();
+    	ArrayList<IedbEpitopePredictionAminoAcid> aminoAcids = ieps.getAminoAcids();
+    	for (IedbEpitopePredictionAminoAcid aa: aminoAcids) {
+    		System.out.println(aa.toString()+"|"+aa.getRelativeScore()+"|"+aa.getScore());
+    	}
     }
 }

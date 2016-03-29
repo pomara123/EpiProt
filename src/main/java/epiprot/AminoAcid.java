@@ -1,5 +1,7 @@
 package epiprot;
 
+import epiprot.services.epitopePrediction.IedbEpitopePredictionAminoAcid;
+
 public class AminoAcid {
 	
 	private String residue;
@@ -28,5 +30,4 @@ public class AminoAcid {
 	public String toString() {
 		return residue+position;
 	}
-
 }

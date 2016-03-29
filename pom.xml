@@ -25,6 +25,26 @@
 
   <dependencies>
   	<dependency>
+	    <groupId>com.jgoodies</groupId>
+	    <artifactId>jgoodies-common</artifactId>
+	    <version>1.8.1</version>
+	</dependency>
+  	<dependency>
+        <groupId>org.biojava</groupId>
+        <artifactId>biojava-core</artifactId>
+        <version>4.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.biojava</groupId>
+        <artifactId>biojava-alignment</artifactId>
+        <version>4.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.biojava</groupId>
+        <artifactId>biojava-ws</artifactId>
+        <version>4.1.0</version>
+    </dependency>
+  	<dependency>
         <groupId>uk.ac.ebi.uniprot</groupId>
         <artifactId>japi</artifactId>
         <version>1.0.4</version>

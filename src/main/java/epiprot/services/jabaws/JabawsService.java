@@ -23,14 +23,14 @@ public class JabawsService extends Service implements JabawsConstants {
 	private File msaInputFile;
 	private ArrayList<String> proteinAccs;
 	
-	private String cmd = "java -jar /Users/Patrick/Documents/workspace/epiprot/lib/Jabaws.jar -h=http://www.compbio.dundee.ac.uk/jabaws -s=";
+	private String cmd = "java -jar "+SERVICEFILEPATH+"lib/Jabaws.jar -h=http://www.compbio.dundee.ac.uk/jabaws -s=";
 	private LinkedHashMap<String,String> proteinMap = new LinkedHashMap<String,String>();
 	
 	public JabawsService(String msa, File inputFile) {
 		// TODO Auto-generated constructor stub
 		this.msa = msa;
 		this.msaInputFile = msaInputFile;
-		setProteinMap();
+		//setProteinMap();
 	}
 	
 	public JabawsService(String msa, ArrayList<String> proteinAccs) {
@@ -38,7 +38,7 @@ public class JabawsService extends Service implements JabawsConstants {
 		this.msa = msa;
 		this.proteinAccs = proteinAccs;
 		setFile();
-		setProteinMap();
+		//setProteinMap();
 	}
 
 	@Override
@@ -54,10 +54,15 @@ public class JabawsService extends Service implements JabawsConstants {
             String line = "";
             while ((line = stdInput.readLine()) != null) {
             	if (line.contains("|")) {
+            		System.out.println(line);
             		String[] a1 = line.split("\\s+");
-            		String[] a2 = a1[0].split("\\|");
-            		String key = a2[1];
-            		String value = proteinMap.get(key);
+            		//String[] a2 = a1[0].split("\\|");
+            		String key = a1[0];
+            		
+            		String value = "";
+            		if (proteinMap.containsKey(key)) {
+            			value = proteinMap.get(key);
+            		}
             		value = value + a1[1];
             		proteinMap.put(key, value);
             	}            	
@@ -123,8 +128,9 @@ public class JabawsService extends Service implements JabawsConstants {
 		js.run();
 		LinkedHashMap<String,String> proteinMap = js.getAlignment();
 		List<String> sequences = new ArrayList<String>(proteinMap.values());
-		for(String seq: sequences) {
-			System.out.println(seq);
+		List<String> headers = new ArrayList<String>(proteinMap.keySet());
+		for(int i = 0; i < sequences.size(); i++) {
+			System.out.println(headers.get(i)+" "+sequences.get(i));
 		}
 	}
 }

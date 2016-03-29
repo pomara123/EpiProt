@@ -10,10 +10,12 @@ public class ChouPredictionService extends IedbEpitopePredictionService {
 	}
 	
 	public static void main (String[] args) {
-		Protein protein = new Protein("Q99523");
-		protein.initUniprotService();
+		Protein protein = new Protein("Q99523",true);
 		ChouPredictionService cps = new ChouPredictionService(protein.getSequence());
 		cps.run();
-		System.out.println(cps.getAminoAcids());
+		System.out.println(cps.getAminoAcids().size());
+		for (IedbEpitopePredictionAminoAcid aa : cps.getAminoAcids()) {
+			System.out.println(aa.getScore());
+		}
 	}
 }
