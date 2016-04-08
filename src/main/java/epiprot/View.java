@@ -1,58 +1,97 @@
 package epiprot;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
-
-import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.JViewport;
-import javax.swing.KeyStroke;
-
-import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-import javax.swing.JInternalFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JSplitPane;
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SpringLayout;
-import javax.swing.border.LineBorder;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.JToolBar;
+import javax.swing.JViewport;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
-import javax.swing.text.Element;
 import javax.swing.text.Keymap;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.awt.Color;
-import java.awt.Component;
-import javax.swing.border.MatteBorder;
-
-public class View extends JFrame implements Presenter.View {
+public class View extends JFrame implements Presenter.View, ActionListener {
     
     public static final String LINE_BREAK_ATTRIBUTE_NAME="line_break_attribute";
 	
-	JPanel proteinPanel = new JPanel();
-	JEditorPane headerPane = new JEditorPane();
-	JEditorPane editorPane = new JEditorPane();
+    JFileChooser fileDialog;  // File dialog for use in doOpen() and doSave(). 
+    File currentFile;  // The file, if any that is currently being edited.
+    HTMLDocument editorDocument;
+    HTMLDocument headerDocument;
+	JTextPane headerPane = new JTextPane();
+	JTextPane editorPane = new JTextPane();
+    
+	/** Listener for the edits on the current document. */
+	protected UndoableEditListener undoHandler = new UndoHandler();
+
+	/** UndoManager that we add edits to. */
+	protected UndoManager undo = new UndoManager();
+		
+	private UndoAction undoAction = new UndoAction();
+	private RedoAction redoAction = new RedoAction();
+		
+	private Action cutAction = new DefaultEditorKit.CutAction();
+	private Action copyAction = new DefaultEditorKit.CopyAction();
+	private Action pasteAction = new DefaultEditorKit.PasteAction();
+
+	private Action boldAction = new StyledEditorKit.BoldAction();
+	private Action underlineAction = new StyledEditorKit.UnderlineAction();
+	private Action italicAction = new StyledEditorKit.ItalicAction();
+		
+	private Action insertBreakAction = new DefaultEditorKit.InsertBreakAction();
+	private HTMLEditorKit.InsertHTMLTextAction unorderedListAction 
+		= new HTMLEditorKit.InsertHTMLTextAction("Bullets", "<ul><li> </li></ul>",HTML.Tag.P,HTML.Tag.UL);
+	private HTMLEditorKit.InsertHTMLTextAction bulletAction 
+		= new HTMLEditorKit.InsertHTMLTextAction("Bullets", "<li> </li>",HTML.Tag.UL,HTML.Tag.LI);
+	
+    JPanel proteinPanel = new JPanel();
+	//JEditorPane headerPane = new JEditorPane("text/html","");
+	//JEditorPane editorPane = new JEditorPane("text/html","");
 	JTextField searchField = new JTextField();
 	JButton searchButton = new JButton("Enter");
 	JButton msaButton = new JButton("MSA");
@@ -69,8 +108,26 @@ public class View extends JFrame implements Presenter.View {
     JMenuItem elliproPred = new JMenuItem("Ellipro Epitope Prediction");
     JMenuItem psipred = new JMenuItem("PsiPred Secondary Structure Prediction");
     JMenuItem jpred = new JMenuItem("JPred Secondary Structure Prediction");
-	
+    JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS");
+    
+    JMenuItem foregroundColor = new JMenuItem("Text Color");
+    JMenuItem backgroundColor = new JMenuItem("Background Color");
+    
+    JMenuItem clearPanes = new JMenuItem("Clear View");
+    
 	public View() {
+		HTMLEditorKit editorKit = new HTMLEditorKit();
+		editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
+		headerDocument = (HTMLDocument)editorKit.createDefaultDocument();
+		// Force SwingSet to come up in the Cross Platform L&F
+		try {
+			//UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			// If you want the System L&F instead, comment out the above line and
+			// uncomment the following:
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception exc) {
+			    System.err.println("Error loading L&F: " + exc);
+		}
 		createUI();			 
 	}
 
@@ -92,6 +149,7 @@ public class View extends JFrame implements Presenter.View {
         getContentPane().add(splitPane, BorderLayout.CENTER);
         
         editorPane.setEditorKit(new WrapEditorKit());
+        editorPane.setDocument(new HTMLDocument());
         initKeyMap(editorPane);
         headerPane.setEditorKit(new WrapEditorKit());
         initKeyMap(headerPane);
@@ -135,51 +193,148 @@ public class View extends JFrame implements Presenter.View {
         proteinPanel.add(searchPanel);
         
         createMenuBar();
+        
+        editorPane.setDocument(editorDocument);
+        editorPane.setContentType("text/html");
+        headerPane.setDocument(headerDocument);
+        headerPane.setContentType("text/html");
                 
         setVisible(true);	
 	}
 	
 	private void createMenuBar() {
 
+		//menu bar
 		JMenuBar menubar = new JMenuBar();
-        
+		
+		setJMenuBar(menubar); 
+		
+		//main options
 		JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
+        JMenu formatMenu = new JMenu("Format");
         JMenu servicesMenu = new JMenu("Services");
         
+        menubar.add(fileMenu);
+        menubar.add(editMenu);
+        menubar.add(formatMenu);
+        menubar.add(servicesMenu);
+		        
 		//file
-        ImageIcon iconOpen = new ImageIcon("open.png");
-        ImageIcon iconSave = new ImageIcon("save.png");
-        ImageIcon iconSaveAs = new ImageIcon("saveas.png");
+		JMenuItem newItem = new JMenuItem("New", new ImageIcon("whatsnew-bang.gif"));
+		newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem openItem = new JMenuItem("Open",new ImageIcon("open.png"));
+		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem saveItem = new JMenuItem("Save",new ImageIcon("save.png"));
+		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem saveAsItem = new JMenuItem("Save As",new ImageIcon("saveas.png"));
+		JMenuItem exitItem = new JMenuItem("Exit",new ImageIcon("exit.gif"));
+		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		
+		newItem.addActionListener(this);
+		openItem.addActionListener(this);
+		saveItem.addActionListener(this);
+		saveAsItem.addActionListener(this);
+		exitItem.addActionListener(this);
+        
+		fileMenu.add(newItem);
+		fileMenu.add(openItem);
+		fileMenu.add(saveItem);
+		fileMenu.add(saveAsItem);
+		fileMenu.add(exitItem);
         
         //edit
-        ImageIcon iconCut = new ImageIcon("cut.png");
-        ImageIcon iconCopy = new ImageIcon("copy.png");
-        ImageIcon iconPaste = new ImageIcon("paste.png");        
-
+		JMenuItem undoItem = new JMenuItem(undoAction);
+		undoAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Z,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem redoItem = new JMenuItem(redoAction);
+		JMenuItem cutItem = new JMenuItem(cutAction);
+        cutAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem copyItem = new JMenuItem(copyAction);
+		copyAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem pasteItem = new JMenuItem(pasteAction);
+		pasteAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem clearItem = new JMenuItem("Clear");
+		JMenuItem selectAllItem = new JMenuItem("Select All");
+		JMenuItem insertBreaKItem = new JMenuItem(insertBreakAction);
+		JMenuItem unorderedListItem = new JMenuItem(unorderedListAction);
+		JMenuItem bulletItem = new JMenuItem(bulletAction);
+		
+		cutItem.setText("Cut");
+		copyItem.setText("Copy");
+		pasteItem.setText("Paste");
+		insertBreaKItem.setText("Break");
+		cutItem.setIcon(new ImageIcon("cut.png"));
+		copyItem.setIcon(new ImageIcon("copy.png"));
+		pasteItem.setIcon(new ImageIcon("paste.png"));
+		
         JMenu impMenu = new JMenu("Import");
         
-        //file
-        JMenuItem openMi = new JMenuItem("Open", iconOpen);
-        JMenuItem saveMi = new JMenuItem("Save", iconSave);
-        JMenuItem saveAsMi = new JMenuItem("Save As", iconSaveAs);
+        clearItem.addActionListener(this);
+		selectAllItem.addActionListener(this);
+		
+		editMenu.add(undoItem);
+		editMenu.add(redoItem);
+		editMenu.add(cutItem);
+		editMenu.add(copyItem);
+		editMenu.add(pasteItem);
+		editMenu.add(clearItem);
+		editMenu.add(selectAllItem);
+		editMenu.add(insertBreaKItem);
+		editMenu.add(unorderedListItem);
+		editMenu.add(bulletItem);
         
-        fileMenu.add(openMi);
-        fileMenu.add(saveMi);
-        fileMenu.add(saveAsMi);
-        fileMenu.addSeparator();
-        fileMenu.add(impMenu);
-        fileMenu.addSeparator();
+        //format menu
+		JMenuItem boldMenuItem = new JMenuItem(boldAction);
+        boldAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem underlineMenuItem = new JMenuItem(underlineAction);
+        underlineAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_U,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		JMenuItem italicMenuItem = new JMenuItem(italicAction);
+        italicAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
+		boldMenuItem.setText("Bold");
+		underlineMenuItem.setText("Underline");
+		italicMenuItem.setText("Italic");
+
+		boldMenuItem.setIcon(new ImageIcon("bold.png"));
+		underlineMenuItem.setIcon(new ImageIcon("underline.png"));
+		italicMenuItem.setIcon(new ImageIcon("italic.png"));
+		
+		formatMenu.add(boldMenuItem);
+		formatMenu.add(underlineMenuItem);
+		formatMenu.add(italicMenuItem);
+        formatMenu.addSeparator();
         
-        //edit
-        JMenuItem cutMi = new JMenuItem("Cut", iconCut);
-        JMenuItem copyMi = new JMenuItem("Copy", iconCopy);
-        JMenuItem pasteMi = new JMenuItem("Paste", iconPaste);
-        
-        editMenu.add(cutMi);
-        editMenu.add(copyMi);
-        editMenu.add(pasteMi);
-        
+        //text color
+        JMenu colorMenu = new JMenu("Color");
+        JMenuItem redTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Red",Color.red));
+		JMenuItem orangeTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Orange",Color.orange));
+		JMenuItem yellowTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Yellow",Color.yellow));
+		JMenuItem greenTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Green",Color.green));
+		JMenuItem blueTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Blue",Color.blue));
+		JMenuItem cyanTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Cyan",Color.cyan));
+		JMenuItem magentaTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Magenta",Color.magenta));
+		JMenuItem blackTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Black",Color.black));
+
+		redTextItem.setIcon(new ImageIcon("red.png"));
+		orangeTextItem.setIcon(new ImageIcon("orange.png"));
+		yellowTextItem.setIcon(new ImageIcon("yellow.png"));
+		greenTextItem.setIcon(new ImageIcon("green.png"));
+		blueTextItem.setIcon(new ImageIcon("blue.png"));
+		cyanTextItem.setIcon(new ImageIcon("cyan.png"));
+		magentaTextItem.setIcon(new ImageIcon("magenta.png"));
+		blackTextItem.setIcon(new ImageIcon("black.png"));
+
+		colorMenu.add(redTextItem);
+		colorMenu.add(orangeTextItem);
+		colorMenu.add(yellowTextItem);
+		colorMenu.add(greenTextItem);
+		colorMenu.add(blueTextItem);
+		colorMenu.add(cyanTextItem);
+		colorMenu.add(magentaTextItem);
+		colorMenu.add(blackTextItem);
+	
+        formatMenu.add(colorMenu);
+		
         //Services
         servicesMenu.add(blast);
         servicesMenu.addSeparator();
@@ -192,17 +347,15 @@ public class View extends JFrame implements Presenter.View {
         servicesMenu.add(elliproPred);
         servicesMenu.addSeparator();
         servicesMenu.add(psipred);
-        servicesMenu.add(jpred);        
-
-        menubar.add(fileMenu);
-        menubar.add(editMenu);
-        menubar.add(servicesMenu);
-
-        setJMenuBar(menubar);        
+        servicesMenu.add(jpred);
+        servicesMenu.addSeparator();
+        servicesMenu.add(pdbStructure);       
     }
 	
-	protected void insertLineBreak(JEditorPane edit) {
-        try {
+	
+	
+	   protected void insertLineBreak(JEditorPane edit) {
+		   try {
             int offs = edit.getCaretPosition();
             Document doc = edit.getDocument();
             SimpleAttributeSet attrs;
@@ -300,10 +453,6 @@ public class View extends JFrame implements Presenter.View {
 	public void addProteinSelecter(SelectProteinView selectProtein) {
 		// TODO Auto-generated method stub
 		proteinPanel.add(selectProtein);
-	}
-	
-	public void setPresenter(Presenter presenter) {
-		
 	}
 
 	@Override
@@ -466,5 +615,250 @@ public class View extends JFrame implements Presenter.View {
 	public JMenuItem jpred() {
 		// TODO Auto-generated method stub
 		return jpred;
+	}
+
+	@Override
+	public JMenuItem pdbStructure() {
+		// TODO Auto-generated method stub
+		return pdbStructure;
+	}
+
+	@Override
+	public JMenuItem foregroundColor() {
+		// TODO Auto-generated method stub
+		return foregroundColor;
+	}
+
+	@Override
+	public JMenuItem backgroundColor() {
+		// TODO Auto-generated method stub
+		return backgroundColor;
+	}
+
+	@Override
+	public JMenuItem clearPanes() {
+		// TODO Auto-generated method stub
+		return clearPanes;
+	}
+	
+	class UndoHandler implements UndoableEditListener {
+
+		/**
+		 * Messaged when the Document has created an edit, the edit is
+		 * added to <code>undo</code>, an instance of UndoManager.
+		 */
+		public void undoableEditHappened(UndoableEditEvent e) {
+			undo.addEdit(e.getEdit());
+			undoAction.update();
+			redoAction.update();
+		}
+	}
+	
+	class UndoAction extends AbstractAction {
+		public UndoAction() {
+			super("Undo");
+			setEnabled(false);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			try {
+				undo.undo();
+			} catch (CannotUndoException ex) {
+				System.out.println("Unable to undo: " + ex);
+				ex.printStackTrace();
+			}
+			update();
+			redoAction.update();
+		}
+
+		protected void update() {
+			if(undo.canUndo()) {
+				setEnabled(true);
+				putValue(Action.NAME, undo.getUndoPresentationName());
+			}else {
+				setEnabled(false);
+				putValue(Action.NAME, "Undo");
+			}
+		}
+	}
+
+	class RedoAction extends AbstractAction {
+		
+		public RedoAction() {
+			super("Redo");
+			setEnabled(false);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			try {
+				undo.redo();
+			} catch (CannotRedoException ex) {
+				System.err.println("Unable to redo: " + ex);
+				ex.printStackTrace();
+			}
+			update();
+			undoAction.update();
+		}
+	
+		protected void update() {
+			if(undo.canRedo()) {
+				setEnabled(true);
+				putValue(Action.NAME, undo.getRedoPresentationName());
+			}else {
+				setEnabled(false);
+				putValue(Action.NAME, "Redo");
+			}
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		String actionCommand = e.getActionCommand();
+		
+		if (actionCommand.compareTo("New") == 0){
+			startNewDocument();
+		} else if (actionCommand.compareTo("Open") == 0){
+			openDocument();
+		} else if (actionCommand.compareTo("Save") == 0){
+			saveDocument();
+		} else if (actionCommand.compareTo("Save As") == 0){
+		        saveDocumentAs();
+		} else if (actionCommand.compareTo("Exit") == 0){
+			exit();
+		} else if (actionCommand.compareTo("Clear") == 0){
+			clear();
+		} else if (actionCommand.compareTo("Select All") == 0){
+			selectAll();
+		}
+	}
+	
+	protected void resetUndoManager() {
+		undo.discardAllEdits();
+		undoAction.update();
+		redoAction.update();
+	}
+	
+	public void startNewDocument(){
+		Document oldDoc = editorPane.getDocument();
+		if(oldDoc != null)
+			oldDoc.removeUndoableEditListener(undoHandler);
+		HTMLEditorKit editorKit = new HTMLEditorKit();
+		editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
+		editorPane.setDocument(editorDocument);	
+		headerDocument = (HTMLDocument)editorKit.createDefaultDocument();
+		headerPane.setDocument(headerDocument);	
+		currentFile = null;
+		editorPane.getDocument().addUndoableEditListener(undoHandler);
+		headerPane.getDocument().addUndoableEditListener(undoHandler);
+		resetUndoManager();
+	}
+
+	public void openDocument(){
+		try{
+			File current = new File(".");
+			JFileChooser chooser = new JFileChooser(current);
+			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			chooser.setFileFilter(new HTMLFileFilter());
+			int approval = chooser.showSaveDialog(this);
+			if (approval == JFileChooser.APPROVE_OPTION){
+				currentFile = chooser.getSelectedFile();
+				setTitle(currentFile.getName());	
+				FileReader fr = new FileReader(currentFile);
+				Document oldDoc = editorPane.getDocument();
+				if(oldDoc != null)
+					    oldDoc.removeUndoableEditListener(undoHandler);
+				HTMLEditorKit editorKit = new HTMLEditorKit();
+				editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
+				editorKit.read(fr,editorDocument,0);
+				editorDocument.addUndoableEditListener(undoHandler);
+				editorPane.setDocument(editorDocument);
+				resetUndoManager();
+			}
+		}catch(BadLocationException ble){
+			System.err.println("BadLocationException: " + ble.getMessage());			
+		}catch(FileNotFoundException fnfe){
+			System.err.println("FileNotFoundException: " + fnfe.getMessage());			
+		}catch(IOException ioe){
+			System.err.println("IOException: " + ioe.getMessage());
+		}
+
+	}
+
+	public void saveDocument(){
+		if (currentFile != null){
+			try{
+				FileWriter fw = new FileWriter(currentFile);
+				fw.write(editorPane.getText());
+				fw.close();
+			}catch(FileNotFoundException fnfe){
+				System.err.println("FileNotFoundException: " + fnfe.getMessage());			
+			}catch(IOException ioe){
+				System.err.println("IOException: " + ioe.getMessage());
+			}	
+		}else{
+			saveDocumentAs();
+		}			
+	}
+
+	public void saveDocumentAs(){
+		try{
+			File current = new File(".");
+			JFileChooser chooser = new JFileChooser(current);
+			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			chooser.setFileFilter(new HTMLFileFilter());
+			int approval = chooser.showSaveDialog(this);
+			if (approval == JFileChooser.APPROVE_OPTION){
+				File newFile = chooser.getSelectedFile();
+				if (newFile.exists()){
+					String message = newFile.getAbsolutePath() 
+						+ " already exists. \n"
+						+ "Do you want to replace it?";
+					if (JOptionPane.showConfirmDialog(this, message) == JOptionPane.YES_OPTION){	
+						currentFile = newFile;
+						setTitle(currentFile.getName());	
+						FileWriter fw = new FileWriter(currentFile);
+						fw.write(editorPane.getText());
+						fw.close();
+					}
+				}else{
+					currentFile = new File(newFile.getAbsolutePath());
+					setTitle(currentFile.getName());	
+					FileWriter fw = new FileWriter(currentFile);
+					fw.write(editorPane.getText());
+					fw.close();
+				}
+			}
+		}catch(FileNotFoundException fnfe){
+			System.err.println("FileNotFoundException: " + fnfe.getMessage());			
+		}catch(IOException ioe){
+			System.err.println("IOException: " + ioe.getMessage());
+		}
+	}
+
+	public void exit(){
+		String exitMessage = "Are you sure you want to exit?";
+		if (JOptionPane.showConfirmDialog(this, exitMessage) == JOptionPane.YES_OPTION){
+			System.exit(0);
+		}
+	}
+
+	public void clear(){
+		startNewDocument();
+	}
+	
+	public void selectAll(){
+		editorPane.selectAll();
+	}
+	
+	class HTMLFileFilter extends javax.swing.filechooser.FileFilter{
+		
+		public boolean accept(File f){
+			return ((f.isDirectory()) ||(f.getName().toLowerCase().indexOf(".htm") > 0));
+		}
+		
+		public String getDescription(){
+			return "html";
+		}
 	}
 }

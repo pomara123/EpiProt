@@ -148,7 +148,7 @@ public class Protein {
 	        if (dbRefNode.getNodeType()==Node.ELEMENT_NODE) {
 	            Element dbRefElement = (Element) dbRefNode;
 	            DBentry dbEntry = new DBentry(dbRefElement.getAttribute("id"),dbRefElement.getAttribute("type"));
-	            
+	            //System.out.println("getDBentryList "+dbRefElement.getAttribute("id")+" "+dbRefElement.getAttribute("type"));
 	            NodeList propertyList = dbRefNode.getChildNodes();
 	            ArrayList<DBproperty> dbPropertyList = new ArrayList<DBproperty>();
 	            for (int j = 0; j < propertyList.getLength(); j++) {
@@ -160,32 +160,39 @@ public class Protein {
 	                }
 	            }
 	            dbEntry.setDbPropertiesList(dbPropertyList);
+	            dbEntryList.add(dbEntry);
 	        }
     	}
     	return dbEntryList;
     }
     
     public ArrayList<PDBentry> getPDBentries() {
+		System.out.println("Test");
     	ArrayList<PDBentry> pdbEntryList = new ArrayList<PDBentry>();
     	ArrayList<DBentry> dbEntryList = getDBentryList();
     	for (DBentry dbEntry: dbEntryList) {
     		if (dbEntry.getType().equals("PDB")) {
+    			System.out.println("getPDBentries "+dbEntry.getId()+" "+dbEntry.getType());
     			String method = null;
     			double resolution = 0;
     			String positions = null;
-    			for (DBproperty dbProperty: dbEntry.getDbPropertiesList()) {
-        			if (dbProperty.getType().equals("method")) {
-        				method = dbProperty.getValue();
-        			}
-        			else if (dbProperty.getType().equals("resolution")) {
-        				resolution = Double.parseDouble(dbProperty.getValue());
-        			}
-        			else if (dbProperty.getType().equals("chain")) {
-        				positions = dbProperty.getValue();
-        			}
+    			if (dbEntry.getDbPropertiesList() != null && dbEntry.getDbPropertiesList().size() > 0) {
+	    			for (DBproperty dbProperty: dbEntry.getDbPropertiesList()) {
+	    				System.out.println(dbProperty.getType());
+	        			if (dbProperty.getType().equals("method")) {
+	        				method = dbProperty.getValue();
+	        			}
+	        			else if (dbProperty.getType().equals("resolution")) {
+	        				resolution = Double.parseDouble(dbProperty.getValue());
+	        			}
+	        			else if (dbProperty.getType().equals("chains")) {
+	        				positions = dbProperty.getValue();
+	        			}
+	    			}
+	    			System.out.println();
+					PDBentry pdbEntry = new PDBentry(dbEntry.getId(),dbEntry.getType(),method,resolution,positions);
+					pdbEntryList.add(pdbEntry);
     			}
-				PDBentry pdbEntry = new PDBentry(dbEntry.getId(),dbEntry.getType(),method,resolution,positions);
-				pdbEntryList.add(pdbEntry);
     		}
     	}
     	return pdbEntryList;
@@ -240,8 +247,7 @@ public class Protein {
     }
     
     public static void main (String [] args) {
-    	Protein protein = new Protein ("Q99523");
-    	protein.initUniprotService();
-    	System.out.println(protein.getSequence());
+    	Protein protein = new Protein ("Q99523",true);
+    	protein.getPDBentries();
     }
 }

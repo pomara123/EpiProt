@@ -17,14 +17,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import epiprot.services.jabaws.JabawsConstants;
+import epiprot.services.sifts.PdbEntry;
+import epiprot.services.sifts.SiftAminoAcid;
 import epiprot.services.ssp.JPredAminoAcid;
 import epiprot.services.ssp.JPredSequenceTooLongException;
 import epiprot.services.ssp.JPredService;
 import epiprot.services.ssp.PsiPredAminoAcid;
 import epiprot.services.ssp.PsiPredService;
+import epiprot.services.uniprot.PDBchain;
+import epiprot.services.uniprot.PDBentry;
 import epiprot.services.views.BlastPresenter;
 import epiprot.services.views.IEDBPredPresenter;
 import epiprot.services.views.MSAPresenter;
+import epiprot.services.views.SelectPDBPresenter;
+import epiprot.services.views.SelectPDBView;
+import epiprot.services.views.SiftsPresenter;
+import epiprot.services.views.SiftsView;
 import uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry;
 import uk.ac.ebi.kraken.model.blast.columns.BlastSortingColumnType;
 import uk.ac.ebi.kraken.model.blast.parameters.DatabaseOptions;
@@ -44,6 +52,7 @@ import uk.ac.ebi.kraken.uuw.services.remoting.blast.BlastHit;
 public class Presenter {
 	
 	public static ArrayList<String> msaProteinList = new ArrayList<String>(); 
+	public static ArrayList<PdbEntry> pdbEntryList = new ArrayList<PdbEntry>();
 	public String proteinAcc;
 	public String proteinHeader;
 	public Protein protein;
@@ -66,7 +75,13 @@ public class Presenter {
 	    JMenuItem elliproPred();
 	    JMenuItem psipred();
 	    JMenuItem jpred();
-	    	    
+	    JMenuItem pdbStructure();
+	   
+	    JMenuItem foregroundColor();
+	    JMenuItem backgroundColor();
+	    
+	    JMenuItem clearPanes();
+	    
 	    void insertLine(String header, String line, int headerPosition, int editorPosition);
 	    void insertLineMiddle(String header, String line);
 	    void insertLineAboveTarget(String header, String line);
@@ -257,6 +272,43 @@ public class Presenter {
 				
 			}	
 		});
+		
+		view.pdbStructure().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pdbEntryList.clear();
+				SiftsView siftsView = new SiftsView();
+				SiftsPresenter siftsPresenter = new SiftsPresenter(Presenter.this,siftsView);
+				ArrayList<PDBentry>pdbEntries = protein.getPDBentries();
+				for(PDBentry pdbEntry: pdbEntries) {
+					SelectPDBView spv = new SelectPDBView(protein.acc, pdbEntry.getId(), pdbEntry.getMethod(), pdbEntry.getResolution(), pdbEntry.getPositions());
+					SelectPDBPresenter spp = new SelectPDBPresenter(spv,protein.acc);
+					siftsView.insertEntry(spv);
+				}
+			}
+		});
+		
+		view.foregroundColor().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TextColorChooser cc = new TextColorChooser(view);
+			}
+		});
+		
+		view.backgroundColor().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				BackgroundColorChooser cc = new BackgroundColorChooser(view);
+			}
+		});
+		
+		view.clearPanes().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clearViews();
+			}
+		});
+			
 	}
 	
 	public void display() {
