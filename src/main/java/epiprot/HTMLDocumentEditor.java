@@ -106,8 +106,7 @@ public class HTMLDocumentEditor extends JFrame implements ActionListener{
 		fileMenu.add(saveItem);
 		fileMenu.add(saveAsItem);
 		fileMenu.add(exitItem);
-		
-		
+			
 		JMenuItem undoItem = new JMenuItem(undoAction);
 		JMenuItem redoItem = new JMenuItem(redoAction);
 		JMenuItem cutItem = new JMenuItem(cutAction);

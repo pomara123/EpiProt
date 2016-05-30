@@ -113,7 +113,7 @@ public class ABCPredService extends Service {
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	    		
+		} 
 	}
 	
 	private String getSequence(String input) {

@@ -2,6 +2,8 @@ package epiprot;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -15,6 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+
+import org.jsoup.Jsoup;
 
 import epiprot.services.jabaws.JabawsConstants;
 import epiprot.services.sifts.PdbEntry;
@@ -82,7 +90,7 @@ public class Presenter {
 	    
 	    JMenuItem clearPanes();
 	    
-	    void insertLine(String header, String line, int headerPosition, int editorPosition);
+	    void insertLine(String id, String header, String line, int headerPosition, int editorPosition);
 	    void insertLineMiddle(String header, String line);
 	    void insertLineAboveTarget(String header, String line);
 	    void insertLineBelowTarget(String header, String line);
@@ -93,6 +101,8 @@ public class Presenter {
 		
 		void createUI();
 		void proteinAcc(String proteinAcc);	
+		
+		void reloadDocument();
 	}
 	
 	public interface Model {
@@ -135,7 +145,6 @@ public class Presenter {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				BlastPresenter blastPresenter = new BlastPresenter(Presenter.this);
-				//setBlastHits(dbOption);
 			}		
 		});
 		
@@ -145,9 +154,6 @@ public class Presenter {
 				// TODO Auto-generated method stub
 				if(msaProteinList.size() > 0) {
 					MSAPresenter msaPresenter = new MSAPresenter(Presenter.this);
-					//setAlignment(JabawsConstants.MUSCLE);
-					//System.out.println(proteinHeader);
-					//view.deleteLineByHeader(proteinHeader);
 				}
 			}	
 		});
@@ -167,9 +173,6 @@ public class Presenter {
 				// TODO Auto-generated method stub
 				if(msaProteinList.size() > 1) {
 					MSAPresenter msaPresenter = new MSAPresenter(Presenter.this);
-					//setAlignment(JabawsConstants.MUSCLE);
-					//System.out.println(proteinHeader);
-					//view.deleteLineByHeader(proteinHeader);
 				}
 				else {
 					//message
@@ -288,20 +291,6 @@ public class Presenter {
 			}
 		});
 		
-		view.foregroundColor().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TextColorChooser cc = new TextColorChooser(view);
-			}
-		});
-		
-		view.backgroundColor().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				BackgroundColorChooser cc = new BackgroundColorChooser(view);
-			}
-		});
-		
 		view.clearPanes().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -319,6 +308,7 @@ public class Presenter {
 		Line line = model.fetchProteinLine(proteinId);
 		proteinHeader = line.getHeader();
 		view.insertLineMiddle(line.getHeader(), line.getLine());
+		view.reloadDocument();
 	}
 	
 	public void setBlastHits(DatabaseOptions databaseOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
@@ -326,9 +316,11 @@ public class Presenter {
 		List<BlastHit<UniProtEntry>> blastHits = model.fetchBlastHits(proteinAcc, databaseOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
 		//BlastData<UniProtEntry> blastData = model.fetchBlastData(proteinAcc, dbOptions);
 		for(BlastHit<UniProtEntry> hit: blastHits) {
-			SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
-			SelectProteinPresenter spp = new SelectProteinPresenter(spv);
-			view.proteinPanel().add(spv);
+			if (!hit.getHit().getAc().equals(proteinAcc)) {
+				SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
+				SelectProteinPresenter spp = new SelectProteinPresenter(spv);
+				view.proteinPanel().add(spv);
+			}
 		}
 	}
 	
@@ -337,9 +329,11 @@ public class Presenter {
 		List<BlastHit<UniProtEntry>> blastHits = model.fetchBlastHits(proteinAcc, databaseOptions, similarityMatrixOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
 		//BlastData<UniProtEntry> blastData = model.fetchBlastData(proteinAcc, dbOptions);
 		for(BlastHit<UniProtEntry> hit: blastHits) {
-			SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
-			SelectProteinPresenter spp = new SelectProteinPresenter(spv);
-			view.proteinPanel().add(spv);
+			if (!hit.getHit().getAc().equals(proteinAcc)) {
+				SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
+				SelectProteinPresenter spp = new SelectProteinPresenter(spv);
+				view.proteinPanel().add(spv);
+			}
 		}
 	}
 	
@@ -389,20 +383,29 @@ public class Presenter {
 		for(int i = 1; i < sequences.size(); i++) {
 			view.insertLineBelowTarget(headers.get(i), sequences.get(i));
 		}
+		view.reloadDocument();
 	}
 	
 	public String getMainLine() {
 		String line = "";
-		String [] headers = view.headerPane().getText().split("\n");
-    	String [] lines = view.editorPane().getText().split("\n");
-    	
-    	loop:
-    	for (int i = 0; i < headers.length; i++) {
-    		if(headers[i].contains(proteinAcc+"|")) {
-    			line = lines[i];
-    			break loop;
-    		}
-    	}
+    	try {
+    		HTMLDocument editorDoc = (HTMLDocument) view.editorPane().getDocument();
+        	StringWriter writer = new StringWriter();
+        	HTMLEditorKit kit = new HTMLEditorKit();
+        	kit.write(writer, editorDoc, 0, editorDoc.getLength());
+        	String html = writer.toString();
+        	
+        	org.jsoup.nodes.Document doc = Jsoup.parse(html);
+        	org.jsoup.nodes.Element element = doc.getElementById(proteinAcc);
+        	line = element.text();
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	System.out.println("getMainLine: " +line);
     	return line;
 	}
 	
@@ -412,7 +415,7 @@ public class Presenter {
 	}
 	
     public void insertLine(String header, String line, int headerPosition, int editorPosition) {
-    	view.insertLine(header, line, headerPosition, editorPosition);
+    	view.insertLine(header,header, line, headerPosition, editorPosition);
     }
     public void insertLineMiddle(String header, String line) {
     	view.insertLineMiddle(header, line);

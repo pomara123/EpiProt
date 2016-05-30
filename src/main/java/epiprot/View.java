@@ -3,15 +3,19 @@ package epiprot;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -42,6 +46,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.Keymap;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyledDocument;
@@ -49,11 +54,14 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
 
 public class View extends JFrame implements Presenter.View, ActionListener {
     
@@ -61,10 +69,12 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	
     JFileChooser fileDialog;  // File dialog for use in doOpen() and doSave(). 
     File currentFile;  // The file, if any that is currently being edited.
+    File editorTempFile = new File("editorTempFile.html");
+    File headerTempFile = new File("headerTempFile.html");
     HTMLDocument editorDocument;
     HTMLDocument headerDocument;
-	JTextPane headerPane = new JTextPane();
-	JTextPane editorPane = new JTextPane();
+	//JTextPane headerPane = new JTextPane();
+	//JTextPane editorPane = new JTextPane();
     
 	/** Listener for the edits on the current document. */
 	protected UndoableEditListener undoHandler = new UndoHandler();
@@ -90,14 +100,14 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		= new HTMLEditorKit.InsertHTMLTextAction("Bullets", "<li> </li>",HTML.Tag.UL,HTML.Tag.LI);
 	
     JPanel proteinPanel = new JPanel();
-	//JEditorPane headerPane = new JEditorPane("text/html","");
-	//JEditorPane editorPane = new JEditorPane("text/html","");
+	JEditorPane headerPane = new JEditorPane("text/html","");
+	JEditorPane editorPane = new JEditorPane("text/html","");
 	JTextField searchField = new JTextField();
 	JButton searchButton = new JButton("Enter");
 	JButton msaButton = new JButton("MSA");
     JButton blastButton = new JButton("BLAST");
     String proteinAcc;
-    String newLines = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+    //String newLines = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
     
     JMenuItem blast = new JMenuItem("BLAST");
     JMenuItem msa = new JMenuItem("Alignment");
@@ -116,6 +126,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     JMenuItem clearPanes = new JMenuItem("Clear View");
     
 	public View() {
+		//setUIFont (new javax.swing.plaf.FontUIResource("monospaced",Font.PLAIN,10));
 		HTMLEditorKit editorKit = new HTMLEditorKit();
 		editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
 		headerDocument = (HTMLDocument)editorKit.createDefaultDocument();
@@ -125,6 +136,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 			// If you want the System L&F instead, comment out the above line and
 			// uncomment the following:
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//UIManager.put("TextPane.font", new Font("Currier", Font.PLAIN,10));
 		} catch (Exception exc) {
 			    System.err.println("Error loading L&F: " + exc);
 		}
@@ -134,6 +146,15 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	@Override
 	public void createUI() {
 		// TODO Auto-generated method stub
+		StyleSheet styleSheet = new StyleSheet();
+		styleSheet.addRule("body {line-height: 0px}");
+		editorPane.setFont(new Font("Courier New", Font.PLAIN, 12));
+		headerPane.setFont(new Font("Courier New", Font.PLAIN, 12));
+		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+		headerPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+		
+		addWindowListener(new FrameListener());
+		
 		setTitle("EpiProt");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1000, 600));
@@ -148,21 +169,32 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         splitPane.setDividerLocation(200);;
         getContentPane().add(splitPane, BorderLayout.CENTER);
         
-        editorPane.setEditorKit(new WrapEditorKit());
+        HTMLEditorKit editorEditorKit = new HTMLEditorKit();
+        editorEditorKit.setStyleSheet(styleSheet);
+        editorPane.setEditorKit(new HTMLEditorKit());
         editorPane.setDocument(new HTMLDocument());
         initKeyMap(editorPane);
-        headerPane.setEditorKit(new WrapEditorKit());
-        initKeyMap(headerPane);
         
+        HTMLEditorKit headerEditorKit = new HTMLEditorKit();
+        headerEditorKit.setStyleSheet(styleSheet);
+        headerPane.setEditorKit(new HTMLEditorKit());
+        headerPane.setDocument(new HTMLDocument());
+        initKeyMap(headerPane);        
         
         JSplitPane editorSplitPane = new JSplitPane();
         editorSplitPane.setDividerLocation(200);
+        
         final JScrollPane editorScrollPane = new JScrollPane();
-        editorSplitPane.setRightComponent(editorScrollPane);        
-        editorScrollPane.setViewportView(editorPane);
+        editorSplitPane.setRightComponent(editorScrollPane);
+        JPanel editorPanel = new JPanel(new BorderLayout());
+        editorScrollPane.setViewportView(editorPanel);
+        editorPanel.add(editorPane, BorderLayout.CENTER);
+        
         final JScrollPane headerScrollPane = new JScrollPane();
-        editorSplitPane.setLeftComponent(headerScrollPane);        
-        headerScrollPane.setViewportView(headerPane);
+        editorSplitPane.setLeftComponent(headerScrollPane); 
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerScrollPane.setViewportView(headerPanel);
+        headerPanel.add(headerPane, BorderLayout.CENTER);
         
         //links scrolling of editor pane to header
         headerScrollPane.getViewport().addChangeListener(new ChangeListener() {
@@ -255,14 +287,10 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		pasteAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem clearItem = new JMenuItem("Clear");
 		JMenuItem selectAllItem = new JMenuItem("Select All");
-		JMenuItem insertBreaKItem = new JMenuItem(insertBreakAction);
-		JMenuItem unorderedListItem = new JMenuItem(unorderedListAction);
-		JMenuItem bulletItem = new JMenuItem(bulletAction);
 		
 		cutItem.setText("Cut");
 		copyItem.setText("Copy");
 		pasteItem.setText("Paste");
-		insertBreaKItem.setText("Break");
 		cutItem.setIcon(new ImageIcon("cut.png"));
 		copyItem.setIcon(new ImageIcon("copy.png"));
 		pasteItem.setIcon(new ImageIcon("paste.png"));
@@ -279,10 +307,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		editMenu.add(pasteItem);
 		editMenu.add(clearItem);
 		editMenu.add(selectAllItem);
-		editMenu.add(insertBreaKItem);
-		editMenu.add(unorderedListItem);
-		editMenu.add(bulletItem);
-        
+		
         //format menu
 		JMenuItem boldMenuItem = new JMenuItem(boldAction);
         boldAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -385,68 +410,72 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         kMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,KeyEvent.SHIFT_MASK),a);
     }
     
+    private void insertNewLine(int numOfLines, JEditorPane pane) {	
+    	HTMLDocument doc = (HTMLDocument) pane.getDocument();
+		HTMLEditorKit kit = (HTMLEditorKit) pane.getEditorKit();
+		insertNewLine(numOfLines,doc,kit);
+    }
+    
+    private void insertNewLine(int numOfLines, HTMLDocument doc, HTMLEditorKit kit) {		
+		try {
+			for (int i = 0; i < numOfLines; i++) {
+				kit.insertHTML(doc, doc.getLength(), "<br>", 0, 0, null);
+			}
+		} catch (BadLocationException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     @Override
     public void insertLineMiddle(String header, String line) {
-    	insertLine(newLines+header,newLines+line,0,0);
+    	insertNewLine(15,editorPane);
+    	insertNewLine(15,headerPane);
+    	insertLine(proteinAcc,header,line,headerPane.getDocument().getLength(),editorPane.getDocument().getLength());
     }
     
     @Override
     public void insertLineAboveTarget(String header, String line) {
-    	String [] headers = headerPane.getText().split("\n");
-    	String [] lines = editorPane.getText().split("\n");
-    	int headerPosition = 0;
-    	int linePosition = 0;
-    	System.out.println("************"+proteinAcc);
+    	HTMLDocument headerDoc = (HTMLDocument) headerPane.getDocument();
+    	Element headerElement = headerDoc.getElement(proteinAcc);
     	
-    	loop:
-    	for (int i = 0; i < headers.length; i++) {    		
-    		if(headers[i].contains(proteinAcc+"|")) {
-    			//headerPosition = headerPosition + headers[i].length();
-        		//linePosition = linePosition + lines[i].length();
-    			break loop;
-    		}   
-    		headerPosition = headerPosition + headers[i].length() + 1;
-    		linePosition = linePosition + lines[i].length() + 1;
-    		System.out.println("+++"+headers[i]+" "+headerPosition+" "+linePosition);
-    	}
+    	HTMLDocument editorDoc = (HTMLDocument) editorPane.getDocument();
+    	Element editorElement = editorDoc.getElement(proteinAcc);
     	
-    	insertLine(header,line,headerPosition,linePosition);
+    	insertLine(header,header,line,headerElement.getStartOffset(),editorElement.getStartOffset());
     }
     
     @Override
     public void insertLineBelowTarget(String header, String line) {
-    	String [] headers = headerPane.getText().split("\n");
-    	String [] lines = editorPane.getText().split("\n");
-    	int headerPosition = 0;
-    	int linePosition = 0;
-    	System.out.println("************"+proteinAcc);
     	
-    	loop:
-    	for (int i = 0; i < headers.length; i++) {
-    		headerPosition = headerPosition + headers[i].length() + 1;
-    		linePosition = linePosition + lines[i].length() + 1;
-    		System.out.println("+++"+headers[i]+" "+headerPosition+" "+linePosition);
-    		if(headers[i].contains(proteinAcc+"|")) {
-    			//headerPosition = headerPosition + headers[i].length();
-        		//linePosition = linePosition + lines[i].length();
-    			break loop;
-    		}    		
-    	}
+    	HTMLDocument headerDoc = (HTMLDocument) headerPane.getDocument();
+    	Element headerElement = headerDoc.getElement(proteinAcc);
     	
-    	insertLine(header,line,headerPosition,linePosition);
+    	HTMLDocument editorDoc = (HTMLDocument) editorPane.getDocument();
+    	Element editorElement = editorDoc.getElement(proteinAcc);
+    	
+    	insertLine(header,header,line,headerElement.getEndOffset(),editorElement.getEndOffset());
     }
 	
 	@Override
-	public void insertLine(String header, String line, int headerPosition, int editorPosition) {
-		Document headerDoc = headerPane.getDocument();
-		Document editorDoc = editorPane.getDocument();
+	public void insertLine(String id, String header, String line, int headerPosition, int editorPosition) {
+		HTMLDocument headerDoc = (HTMLDocument) headerPane.getDocument();
+		HTMLDocument editorDoc = (HTMLDocument) editorPane.getDocument();
+		HTMLEditorKit headerPaneKit = (HTMLEditorKit) headerPane.getEditorKit();
+		HTMLEditorKit editorPaneKit = (HTMLEditorKit) editorPane.getEditorKit();
 		try {
-			headerDoc.insertString(headerPosition, header+"\n", null);
-			editorDoc.insertString(editorPosition, line+"\n", null);
-		} catch (BadLocationException e) {
+			headerPaneKit.insertHTML(headerDoc, headerPosition, getHTML("pre",id,header,header), 0, 0, null);
+			editorPaneKit.insertHTML(editorDoc, editorPosition, getHTML("pre",id,header,line), 0, 0, null);
+		} catch (BadLocationException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private String getHTML(String tag, String id, String header, String text) {
+		String html = "<"+tag+" style=\"LINE-HEIGHT:0px;\" id=\""+id+"\" name=\""+header+"\">"+text+"</"+tag+">";
+		System.out.println("$$$"+html);
+		return html;
 	}
 	
 	@Override
@@ -506,8 +535,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	@Override
 	public void deleteLineByProteinAcc(String proteinAcc) {
 		// TODO Auto-generated method stub
-		String [] headers = headerPane.getText().split("\r\n");
-    	String [] lines = editorPane.getText().split("\r\n");
+		String [] headers = headerPane.getText().split(System.getProperty("line.separator"));
+    	String [] lines = editorPane.getText().split(System.getProperty("line.separator"));
     	int headerPosition = 0;
     	int linePosition = 0;
     	proteinAcc = proteinAcc +"|";
@@ -533,12 +562,12 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	@Override
 	public void deleteLineByHeader(String header) {
 		// TODO Auto-generated method stub
-		String[] headers = StringUtils.split(headerPane.getText(), "\r\n");
-		String[] lines = StringUtils.split(editorPane.getText(), "\r\n");
+		String[] headers = StringUtils.split(headerPane.getText(), System.getProperty("line.separator"));
+		String[] lines = StringUtils.split(editorPane.getText(), System.getProperty("line.separator"));
 		//String [] headers = headerPane.getText().split("\r\n");
     	//String [] lines = editorPane.getText().split("\r\n");
-    	int headerPosition = newLines.length();
-    	int linePosition = newLines.length();
+    	int headerPosition = 0;//newLines.length();
+    	int linePosition = 0;//newLines.length();
     	loop:
     	for (int i = 0; i < headers.length; i++) {
     		
@@ -755,34 +784,95 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	}
 
 	public void openDocument(){
+		File current = new File(".");
+		JFileChooser chooser = new JFileChooser(current);
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.setFileFilter(new HTMLFileFilter());
+		int approval = chooser.showOpenDialog(this);
+		if (approval == JFileChooser.APPROVE_OPTION){
+			currentFile = chooser.getSelectedFile();
+			editorTempFile = chooser.getSelectedFile();
+			loadDocument();
+		}
+
+	}
+	
+	@Override
+	public void reloadDocument() {
+		tempSaveDocument();
+		loadDocument();
+	}
+	
+	public void tempSaveDocument(){
 		try{
-			File current = new File(".");
-			JFileChooser chooser = new JFileChooser(current);
-			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-			chooser.setFileFilter(new HTMLFileFilter());
-			int approval = chooser.showSaveDialog(this);
-			if (approval == JFileChooser.APPROVE_OPTION){
-				currentFile = chooser.getSelectedFile();
-				setTitle(currentFile.getName());	
-				FileReader fr = new FileReader(currentFile);
-				Document oldDoc = editorPane.getDocument();
-				if(oldDoc != null)
-					    oldDoc.removeUndoableEditListener(undoHandler);
-				HTMLEditorKit editorKit = new HTMLEditorKit();
-				editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
-				editorKit.read(fr,editorDocument,0);
-				editorDocument.addUndoableEditListener(undoHandler);
-				editorPane.setDocument(editorDocument);
-				resetUndoManager();
-			}
-		}catch(BadLocationException ble){
-			System.err.println("BadLocationException: " + ble.getMessage());			
+			FileWriter fw = new FileWriter(editorTempFile);
+			fw.write(editorPane.getText());
+			fw.close();
 		}catch(FileNotFoundException fnfe){
 			System.err.println("FileNotFoundException: " + fnfe.getMessage());			
 		}catch(IOException ioe){
 			System.err.println("IOException: " + ioe.getMessage());
+		}			
+	}
+	
+	public void loadDocument() {
+		FileReader fr;
+		try {
+			fr = new FileReader(editorTempFile);
+			Document oldDoc = editorPane.getDocument();
+			if(oldDoc != null)
+				    oldDoc.removeUndoableEditListener(undoHandler);
+			HTMLEditorKit editorKit = new HTMLEditorKit();
+			editorDocument = (HTMLDocument)editorKit.createDefaultDocument();
+			editorKit.read(fr,editorDocument,0);
+			editorDocument.addUndoableEditListener(undoHandler);
+			editorPane.setDocument(editorDocument);
+			
+			ArrayList<Header> headers = new ArrayList<Header>();
+			org.jsoup.nodes.Document doc = Jsoup.parse(editorTempFile,null);
+			org.jsoup.select.Elements pres = doc.select("pre");
+			int i = 0;
+			for (org.jsoup.nodes.Element pre : pres) {
+			    System.out.format("pre #%d:\n", ++i);
+			    Header header = new Header();
+			    for(Attribute attr : pre.attributes()) {
+			    	if (attr.getKey().equals("name")) {
+			    		header.setName(attr.getValue());
+			    		System.out.format("%s = %s\n", attr.getKey(), attr.getValue());
+			        }
+			    	if (attr.getKey().equals("id")) {
+			    		header.setId(attr.getValue());
+			    		System.out.format("%s = %s\n", attr.getKey(), attr.getValue());
+			        }
+			    }
+			    headers.add(header);
+			}
+			
+			oldDoc = headerPane.getDocument();
+			if(oldDoc != null)
+				    oldDoc.removeUndoableEditListener(undoHandler);
+			HTMLEditorKit headerPaneKit = new HTMLEditorKit();
+			headerDocument = (HTMLDocument)headerPaneKit.createDefaultDocument();
+			
+			insertNewLine(14,headerDocument,headerPaneKit);
+			
+			for (Header header: headers) {
+				headerPaneKit.insertHTML(headerDocument, headerDocument.getLength(), getHTML("pre",header.id,header.name,header.name), 0, 0, null);
+			}
+			headerDocument.addUndoableEditListener(undoHandler);
+			headerPane.setDocument(headerDocument);
+			
+			resetUndoManager();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 	}
 
 	public void saveDocument(){
@@ -859,6 +949,44 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		
 		public String getDescription(){
 			return "html";
+		}
+	}
+	
+	class FrameListener extends WindowAdapter{
+		public void windowClosing(WindowEvent we){
+			exit();
+		}
+	}
+	
+	public static void setUIFont (javax.swing.plaf.FontUIResource f){
+	    java.util.Enumeration keys = UIManager.getDefaults().keys();
+	    while (keys.hasMoreElements()) {
+	      Object key = keys.nextElement();
+	      Object value = UIManager.get (key);
+	      if (value != null && value instanceof javax.swing.plaf.FontUIResource)
+	        UIManager.put (key, f);
+	    }
+	} 
+	
+	private class Header {
+		private String id;
+		private String name;
+		public Header () {}
+		public Header (String id, String name) {
+			this.setId(id);
+			this.setName(name);
+		}
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 }
