@@ -119,6 +119,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     JMenuItem psipred = new JMenuItem("PsiPred Secondary Structure Prediction");
     JMenuItem jpred = new JMenuItem("JPred Secondary Structure Prediction");
     JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS");
+    JMenuItem ptms = new JMenuItem("Post-Translational Modifications");
     
     JMenuItem foregroundColor = new JMenuItem("Text Color");
     JMenuItem backgroundColor = new JMenuItem("Background Color");
@@ -374,7 +375,9 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         servicesMenu.add(psipred);
         servicesMenu.add(jpred);
         servicesMenu.addSeparator();
-        servicesMenu.add(pdbStructure);       
+        servicesMenu.add(pdbStructure);  
+        servicesMenu.addSeparator();
+        servicesMenu.add(ptms);
     }
 	
 	
@@ -650,6 +653,12 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	public JMenuItem pdbStructure() {
 		// TODO Auto-generated method stub
 		return pdbStructure;
+	}
+	
+	@Override
+	public JMenuItem ptms() {
+		// TODO Auto-generated method stub
+		return ptms;
 	}
 
 	@Override

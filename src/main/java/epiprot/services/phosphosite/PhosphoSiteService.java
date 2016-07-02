@@ -20,13 +20,13 @@ public class PhosphoSiteService extends Service {
 	private static final String INPUT_GZIP_FILE = "http://www.phosphosite.org/downloads/";
 	
 	//PTM constants
-	private static final String PHOSPHOYLATED = "phosphoylated";
-	private static final String ACETYLATED = "acetylated";
-	private static final String METHYLATED = "methylated";
-	private static final String OGALNAC = "o-galnac";
-	private static final String OGLCNAC = "o-glcnac";
-	private static final String SUMOYLATED = "sumoylated";
-	private static final String UBIQUITINATED = "ubiquitinated";
+	public static final String PHOSPHOYLATED = "phosphoylated";
+	public static final String ACETYLATED = "acetylated";
+	public static final String METHYLATED = "methylated";
+	public static final String OGALNAC = "o-galnac";
+	public static final String OGLCNAC = "o-glcnac";
+	public static final String SUMOYLATED = "sumoylated";
+	public static final String UBIQUITINATED = "ubiquitinated";
 	
 	public String sequence;
 	public String uniprotId;
@@ -47,7 +47,9 @@ public class PhosphoSiteService extends Service {
 		this.sequence = sequence;
 		this.uniprotId = uniprotId;
 		for (int i = 0; i < sequence.length(); i++) {
-			aaList.add(new PhosphoSiteAminoAcid());
+			PhosphoSiteAminoAcid aa = new PhosphoSiteAminoAcid();
+			aa.setPTM(false);
+			aaList.add(aa);
     	}
 		this.getAcetylation = true;
 		this.getMethylation = true;

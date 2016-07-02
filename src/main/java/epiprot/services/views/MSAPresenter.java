@@ -59,6 +59,7 @@ public class MSAPresenter {
 		            	else if(temp.getText().equals("GLProbs")) {msaProgram = JabawsConstants.GLPROBS;}
 		            	
 		            	presenter.setAlignment(msaProgram); 
+		            	presenter.msaProteinList.clear();
 		            	break;
 		            }  
 		        } 

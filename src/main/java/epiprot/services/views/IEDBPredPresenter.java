@@ -36,10 +36,10 @@ public class IEDBPredPresenter {
 
 	}
 
-	public IEDBPredPresenter(Presenter presenter, int proteinSeqLength) {
+	public IEDBPredPresenter(Presenter presenter) {
 		// TODO Auto-generated constructor stub
 		this.presenter = presenter;
-		this.proteinSeqLength = proteinSeqLength;
+		this.proteinSeqLength = presenter.protein.getSequence().length();
 		bindHandlers();
 	}
 	

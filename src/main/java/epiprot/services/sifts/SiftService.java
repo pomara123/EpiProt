@@ -119,9 +119,9 @@ public class SiftService extends Service {
 	}
 	
 	public static void main (String [] args) {
-		SiftService siftReader = new SiftService("3G2U","Q99523",2.70);
-		siftReader.run();
-		ArrayList<SiftAminoAcid> aminoAcidList = siftReader.getAminoAcids();
+		SiftService siftService = new SiftService("3G2U","Q99523",2.70);
+		siftService.run();
+		ArrayList<SiftAminoAcid> aminoAcidList = siftService.getAminoAcids();
 		for (int i = 0; i < aminoAcidList.size(); i++) {
 			SiftAminoAcid aminoAcid = aminoAcidList.get(i);
 			System.out.println(aminoAcid.toString());

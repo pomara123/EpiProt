@@ -16,6 +16,8 @@ import epiprot.services.DocumentNullException;
 import epiprot.services.uniprot.DBentry;
 import epiprot.services.uniprot.DBproperty;
 import epiprot.services.uniprot.PDBentry;
+import epiprot.services.uniprot.UniProtAminoAcid;
+import epiprot.services.uniprot.UniProtPTM;
 import epiprot.services.uniprot.UniprotService;
 
 public class Protein {
@@ -53,7 +55,7 @@ public class Protein {
     }
     
     //returns the Uniprot Name Id i.e. SORT_HUMAN
-	public String getUniprotNameID() {
+	public String getUniprotNameId() {
 		NodeList nameList = getNodeList("name");
 		Node nameNode = nameList.item(0);
 		Element name = (Element) nameNode; 
@@ -62,7 +64,7 @@ public class Protein {
 	
 	//converts target name to mouse target name (ex SORT_HUMAN to SORT_MOUSE)
     public String convertNameToMouse () {
-        String targetName = getUniprotNameID();        
+        String targetName = getUniprotNameId();        
         for (int i = 0; i < targetName.length(); i++) {
             if (targetName.charAt(i) == '_') {
                 targetName = targetName.substring(0,i+1);
@@ -73,7 +75,7 @@ public class Protein {
     
   //converts target name to RAT target name (ex SORT_HUMAN to SORT_RAT)
     public String convertNameToRat () {
-        String targetName = getUniprotNameID();
+        String targetName = getUniprotNameId();
         for (int i = 0; i < targetName.length(); i++) {
             if (targetName.charAt(i) == '_') {
                 targetName = targetName.substring(0,i+1);
@@ -84,7 +86,7 @@ public class Protein {
 
     //converts target name to human target name (ex SORT_MOUSE to SORT_HUMAN)
     public String convertNameToHuman () {
-        String targetName = getUniprotNameID();
+        String targetName = getUniprotNameId();
         for (int i = 0; i < targetName.length(); i++) {
             if (targetName.charAt(i) == '_') {
                 targetName = targetName.substring(0,i+1);
@@ -239,6 +241,82 @@ public class Protein {
 	        }
     	}
 		return "";
+    }
+    
+    public ArrayList<UniProtAminoAcid> getAminoAcids() {
+    	ArrayList<UniProtAminoAcid> aaList = new ArrayList<UniProtAminoAcid>();
+    	for(int i = 0; i < getSequence().length(); i++) {
+    		aaList.add(new UniProtAminoAcid());
+    	}
+    	
+    	ArrayList<UniProtPTM> ptmList = getPTMs();
+    	for(UniProtPTM ptm: ptmList) {
+    		
+    	}
+    	return aaList;
+    }
+    
+    public ArrayList<UniProtPTM> getPTMs() {
+    	ArrayList<UniProtPTM> ptmList = new ArrayList<UniProtPTM>();
+    	NodeList featureNodeList = getNodeList("feature");
+    	for(int i = 0; i < featureNodeList.getLength(); i++) {
+    		Node featureNode = featureNodeList.item(i);
+    		if(featureNode.getNodeType() == Node.ELEMENT_NODE) {
+    			Element featureElement = (Element) featureNode;
+    			if(featureElement.hasAttribute("type")) {
+    				String featureType = featureElement.getAttribute("type");
+    				if(featureType.equals("modified residue") || featureType.equals("glycosylation site") || 
+    						featureType.equals("disulfide bond") || featureType.equals("cross-link")){
+    					UniProtPTM uniProtPTM = new UniProtPTM();
+    					uniProtPTM.setUniprotType((featureElement.getAttribute("type")).toLowerCase());
+    					uniProtPTM.setDescription((featureElement.getAttribute("description")).toLowerCase());    					
+    					uniProtPTM.setEvidence(getEvidenceArray(featureElement.getAttribute("evidence")));
+    					/*
+    					 * after uniprottype and description have been set, you can set the type.
+    					 * UniProtPTM will pull info from the description and uniprottype in order
+    					 * to set the type and linkage (if applicable)
+    					 */
+    					if(featureType.equals("disulfide bond")) {
+    						uniProtPTM.setBeginPosition(Integer.parseInt(((Element) featureElement.getElementsByTagName("begin").item(0)).getAttribute("position")));
+    						uniProtPTM.setEndPosition(Integer.parseInt(((Element) featureElement.getElementsByTagName("end").item(0)).getAttribute("position")));
+    					}
+    					else {
+    						System.out.println("**********"+Integer.parseInt(((Element) featureElement.getElementsByTagName("position").item(0)).getAttribute("position")));
+    						uniProtPTM.setPosition(Integer.parseInt(((Element) featureElement.getElementsByTagName("position").item(0)).getAttribute("position")));
+    					}
+    					//System.out.println(uniProtPTM.getPosition()+":"+uniProtPTM.getBeginPosition()+":"+uniProtPTM.getEndPosition()+":"+uniProtPTM.getUniprotType()+":"+uniProtPTM.getDescription()+":"+uniProtPTM.getEvidence());
+    					uniProtPTM.setType(); 
+    					ptmList.add(uniProtPTM);
+    				}
+    			}    	    		
+    		}    		
+    	}
+    	return ptmList;
+    }
+    
+    private int [] getEvidenceArray(String evidence) {
+    	String [] stringEvidenceArray = evidence.split("\\s+");
+    	int [] evidenceArray = new int [stringEvidenceArray.length];
+    	
+    	for(int i = 0; i < stringEvidenceArray.length; i++) {
+    		if(isNumeric(stringEvidenceArray[i])) {
+    			evidenceArray[i] = Integer.parseInt(stringEvidenceArray[i]);
+    		}
+    	}
+    	return evidenceArray;
+    }
+    
+    public static boolean isNumeric(String str)  
+    {  
+      try  
+      {  
+        double d = Double.parseDouble(str);  
+      }  
+      catch(NumberFormatException nfe)  
+      {  
+        return false;  
+      }  
+      return true;  
     }
     
     public File getFastaFile() {

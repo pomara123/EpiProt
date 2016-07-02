@@ -20,6 +20,13 @@ import uk.ac.ebi.kraken.model.blast.parameters.StatsOptions;
 import uk.ac.ebi.kraken.model.blast.parameters.TopcomboN;
 import uk.ac.ebi.kraken.uuw.services.remoting.blast.BlastData;
 import uk.ac.ebi.kraken.uuw.services.remoting.blast.BlastHit;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.UniProtHit;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DatabaseOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DropOffOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ExpectationOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.FilterOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.MatrixOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ScoreCutoffOption;
 
 public class Model implements Presenter.Model {
 	
@@ -30,33 +37,9 @@ public class Model implements Presenter.Model {
 		// TODO Auto-generated method stub
 		Line line = new Line();
 		Protein protein = new Protein(proteinAcc,true);
-		line.setHeader(proteinAcc+"|"+protein.getUniprotNameID()+"|"+protein.getDatabase());
+		line.setHeader(proteinAcc+"|"+protein.getUniprotNameId()+"|"+protein.getDatabase());
 		line.setLine(protein.getSequence());
 		return line;
-	}
-
-	@Override
-	public List<BlastHit<UniProtEntry>> fetchBlastHits(String proteinAcc, DatabaseOptions databaseOptions, SimilarityMatrixOptions similarityMatrixOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
-		// TODO Auto-generated method stub
-		UniprotBlastService ubs = new UniprotBlastService(new Protein(proteinAcc,true),databaseOptions, similarityMatrixOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
-		ubs.run();
-		return ubs.getBlastResults();
-	}
-	
-	@Override
-	public List<BlastHit<UniProtEntry>> fetchBlastHits(String proteinAcc, DatabaseOptions databaseOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
-		// TODO Auto-generated method stub
-		UniprotBlastService ubs = new UniprotBlastService(new Protein(proteinAcc,true),databaseOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
-		ubs.run();
-		return ubs.getBlastResults();
-	}
-
-	@Override
-	public BlastData<UniProtEntry> fetchBlastData(String proteinAcc, List<DatabaseOptions> dbOptions) {
-		// TODO Auto-generated method stub
-		UniprotBlastService ubs = new UniprotBlastService(new Protein(proteinAcc,true),dbOptions);
-		ubs.run();
-		return ubs.getBlastData();
 	}
 
 	@Override
@@ -68,10 +51,20 @@ public class Model implements Presenter.Model {
 	}
 
 	@Override
-	public int fetchProteinLength(String proteinAcc) {
+	public ArrayList<UniProtHit> fetchBlastHits(String proteinAcc, DatabaseOption databaseOption,
+			ExpectationOption expectationOption, FilterOption filterOption, DropOffOption dropOffOption,
+			MatrixOption matrixOption, ScoreCutoffOption scoreCutoffOption, boolean isGapAlign, int gapExt, int gapOpen,
+			boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
 		// TODO Auto-generated method stub
-		Protein protein = new Protein(proteinAcc,true);
-		return protein.getSequence().length();
+		UniprotBlastService ubs = new UniprotBlastService(new Protein(proteinAcc,true), databaseOption, expectationOption, filterOption, dropOffOption, matrixOption, scoreCutoffOption, isGapAlign, gapExt, gapOpen, limitToTargetSpecies, limitToSwissProtDB);
+		ubs.run();
+		return ubs.getBlastResults();
+	}
+
+	@Override
+	public BlastData<UniProtEntry> fetchBlastData(String proteinAcc, List<DatabaseOption> dbOptions) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

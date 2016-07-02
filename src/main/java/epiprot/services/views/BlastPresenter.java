@@ -8,39 +8,35 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import epiprot.Presenter;
-import uk.ac.ebi.kraken.model.blast.parameters.DatabaseOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.ExpectedThreshold;
-import uk.ac.ebi.kraken.model.blast.parameters.FilterOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.FormatOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.GapAlign;
-import uk.ac.ebi.kraken.model.blast.parameters.MaxNumberResultsOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.ScoreOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.SensitivityValue;
-import uk.ac.ebi.kraken.model.blast.parameters.SimilarityMatrixOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.SortOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.StatsOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.TopcomboN;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.AlignmentCutoffOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DatabaseOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DropOffOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ExpectationOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.FilterOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.MatrixOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ScoreCutoffOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.SequenceTypeOption;
 
 public class BlastPresenter {
 	
 	Presenter presenter;
 	
 	interface View {
-		JComboBox targetDatabaseComboBox();
-		JComboBox eThresholdComboBox();
-		JComboBox matrixComboBox();
-		//JComboBox filteringComboBox();
-		JComboBox gappedComboBox();	
-		JComboBox hitsComboBox();
-		JComboBox gapAlignComboBox();
-		JComboBox sensitivityValueComboBox();
-		JComboBox scoreOptionscomboBox();
-		JComboBox statsOptionsComboBox();
-		JComboBox sortOptionsComboBox();
-		JComboBox topcomboNComboBox();
-		JComboBox formatOptionsComboBox();
+		JComboBox databaseOptionComboBox();
+		JComboBox expectationOptionComboBox();
+		JComboBox filterOptionComboBox();
+		JComboBox dropOffOptionComboBox();
+		JComboBox isGapAlignComboBox();
+		JTextField gapExtTextField();
+		JTextField gapOpenTextField();
+		JComboBox matrixOptionComboBox();
+		//JComboBox alignmentCutoffOption = new JComboBox();
+		JComboBox scoreCutoffOptionComboBox();
 		JCheckBox chckbxLimitToProteins();
 		JCheckBox chckbxLimitToSwissProt();
 
@@ -62,81 +58,143 @@ public class BlastPresenter {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub	
 				//System.out.println("BlastPresenter bindHandlers");
-				DatabaseOptions databaseOptions = (DatabaseOptions) view.targetDatabaseComboBox().getSelectedItem();
-				System.out.println(databaseOptions.toString());
-				ExpectedThreshold expectedThreshold = (ExpectedThreshold) view.eThresholdComboBox().getSelectedItem(); 
-				//FilterOptions filterOptions = (FilterOptions) view.filteringComboBox().getSelectedItem(); 
-				MaxNumberResultsOptions maxNumberResultsOptions = (MaxNumberResultsOptions) view.hitsComboBox().getSelectedItem(); 
-				ScoreOptions scoreOptions = (ScoreOptions) view.scoreOptionscomboBox().getSelectedItem();
-				SensitivityValue sensitivityValue = (SensitivityValue) view.sensitivityValueComboBox().getSelectedItem();
-				SortOptions sortOptions = (SortOptions) view.sortOptionsComboBox().getSelectedItem();
-				StatsOptions statsOptions = (StatsOptions) view.statsOptionsComboBox().getSelectedItem();
-				FormatOptions formatOptions = (FormatOptions) view.formatOptionsComboBox().getSelectedItem();
-				TopcomboN topcomboN = (TopcomboN) view.topcomboNComboBox().getSelectedItem();
-				GapAlign gapAlign = (GapAlign) view.gapAlignComboBox().getSelectedItem();
+				DatabaseOption databaseOption = (DatabaseOption) view.databaseOptionComboBox().getSelectedItem();
+				System.out.println(databaseOption.toString());
+				
+				ExpectationOption expectationOption = (ExpectationOption) view.expectationOptionComboBox().getSelectedItem(); 
+				FilterOption filterOption = (FilterOption) view.filterOptionComboBox().getSelectedItem();
+				DropOffOption dropOffOption = (DropOffOption) view.dropOffOptionComboBox().getSelectedItem();
+			    MatrixOption matrixOption = (MatrixOption) view.matrixOptionComboBox().getSelectedItem(); 
+				ScoreCutoffOption scoreCutoffOption = (ScoreCutoffOption) view.scoreCutoffOptionComboBox().getSelectedItem();
+				
+				boolean isGapAlign = (boolean) view.isGapAlignComboBox().getSelectedItem();
+			    int gapExt = Integer.parseInt(view.gapExtTextField().getText());
+			    int gapOpen = Integer.parseInt(view.gapOpenTextField().getText());
+				
 				boolean limitToTargetSpecies = view.chckbxLimitToProteins().isSelected();
 				boolean limitToSwissProtDB = view.chckbxLimitToSwissProt().isSelected();
 				
-				Object o = view.matrixComboBox().getSelectedItem();
-				if (o instanceof String) {
-					presenter.setBlastHits(databaseOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
+								
+				presenter.setBlastHits(databaseOption, expectationOption, filterOption, dropOffOption, matrixOption, scoreCutoffOption, isGapAlign, gapExt, gapOpen, limitToTargetSpecies, limitToSwissProtDB);
+	
+			}		
+		});
+		
+		view.gapExtTextField().getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			public void checkTextField() {
+				String text = view.gapExtTextField().getText();
+				if(isInteger(text) && (Integer.parseInt(text) == -1 || (Integer.parseInt(text) > 0 && Integer.parseInt(text) < 5))) {
+					view.submitButton().setEnabled(true);
 				}
 				else {
-					SimilarityMatrixOptions similarityMatrixOptions = (SimilarityMatrixOptions) view.matrixComboBox().getSelectedItem(); 
-					presenter.setBlastHits(databaseOptions, similarityMatrixOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
+					view.submitButton().setEnabled(false);
 				}
-			}		
+			}
+		});
+		
+		view.gapOpenTextField().getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkTextField();
+			}
+			public void checkTextField() {
+				String text = view.gapOpenTextField().getText();
+				if(isInteger(text) && (Integer.parseInt(text) == -1 || (Integer.parseInt(text) > 0 && Integer.parseInt(text) < 5))) {
+					view.submitButton().setEnabled(true);
+				}
+				else {
+					view.submitButton().setEnabled(false);
+				}
+			}
 		});
 	}
 	
-	private DatabaseOptions getDatabaseOptions(String db) {
+	private DatabaseOption getDatabaseOption(String db) {
 		switch(db){
         case "UniProtKB/Swiss-Prot" :
-            return DatabaseOptions.SWISSPROT;
+            return DatabaseOption.SWISSPROT;
         case "UniProtKB" :
-            return DatabaseOptions.UNIPROTKB;
+            return DatabaseOption.UNIPROTKB;
         case "Archaea" :
-            return DatabaseOptions.UNIPROT_ARCHAEA;
+            return DatabaseOption.UNIPROT_ARCHAEA;
         case "Bacteria" :
-            return DatabaseOptions.UNIPROT_BACTERIA;
+            return DatabaseOption.UNIPROT_BACTERIA;
         case "Eukaryota" :
-            return DatabaseOptions.UNIPROT_EUKARYOTA;
+            return DatabaseOption.UNIPROT_EUKARYOTA;
         case "Arthropoda" :
-            return DatabaseOptions.UNIPROT_ARTHROPODA;
+            return DatabaseOption.UNIPROT_ARTHROPODA;
         case "Fungi" :
-            return DatabaseOptions.UNIPROT_FUNGI;
+            return DatabaseOption.UNIPROT_FUNGI;
         case "Human" :
-            return DatabaseOptions.UNIPROT_HUMAN;
+            return DatabaseOption.UNIPROT_HUMAN;
         case "Mammals" :
-            return DatabaseOptions.UNIPROT_MAMMALS;
+            return DatabaseOption.UNIPROT_MAMMALS;
         case "Plants" :
-            return DatabaseOptions.UNIPROT_VIRIDIPLANTAE;
+            return DatabaseOption.UNIPROT_VIRIDIPLANTAE;
         case "Rodents" :
-            return DatabaseOptions.UNIPROT_RODENTS;
+            return DatabaseOption.UNIPROT_RODENTS;
         case "Vertebrates" :
-            return DatabaseOptions.UNIPROT_VERTEBRATES;
+            return DatabaseOption.UNIPROT_VERTEBRATES;
         case "Viruses" :
-            return DatabaseOptions.UNIPROT_VIRUSES;
+            return DatabaseOption.UNIPROT_VIRUSES;
         case "with 3D structure (PDB)" :
-            return DatabaseOptions.UNIPROT_PDB;
+            return DatabaseOption.UNIPROT_PDB;
         case "Microbial proteomes" :
-            return DatabaseOptions.UNIPROT_COMPLETE_MICROBIAL_PROTEOMES;
+            return DatabaseOption.UNIPROT_COMPLETE_MICROBIAL_PROTEOMES;
 		case "UniRef100" :
-	        return DatabaseOptions.UNIREF_100;
+	        return DatabaseOption.UNIREF_100;
 		case "UniRef90" :
-		    return DatabaseOptions.UNIREF_90;
+		    return DatabaseOption.UNIREF_90;
 		case "UniRef50" :
-		    return DatabaseOptions.UNIREF_50;
+		    return DatabaseOption.UNIREF_50;
 		case "UniParc" :
-		    return DatabaseOptions.UNIPARC;
+		    return DatabaseOption.UNIPARC;
 		case "Trembl" :
-		    return DatabaseOptions.TREMBL;
+		    return DatabaseOption.TREMBL;
 		}
 		return null;
 	}
 	
+	private boolean isInteger(String s) {
+		try { 
+	        Integer.parseInt(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    } catch(NullPointerException e) {
+	        return false;
+	    }
+	    // only got here if we didn't return false
+	    return true;
+	}
+	
 	public static void main (String[] args) {
-		System.out.println(DatabaseOptions.SWISSPROT);
+		System.out.println(DatabaseOption.SWISSPROT);
 	}
 
 }

@@ -11,51 +11,40 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.jsoup.Jsoup;
+import org.jsoup.Jsoup;	
 
-import epiprot.services.jabaws.JabawsConstants;
 import epiprot.services.sifts.PdbEntry;
-import epiprot.services.sifts.SiftAminoAcid;
 import epiprot.services.ssp.JPredAminoAcid;
 import epiprot.services.ssp.JPredSequenceTooLongException;
 import epiprot.services.ssp.JPredService;
 import epiprot.services.ssp.PsiPredAminoAcid;
 import epiprot.services.ssp.PsiPredService;
-import epiprot.services.uniprot.PDBchain;
 import epiprot.services.uniprot.PDBentry;
 import epiprot.services.views.BlastPresenter;
 import epiprot.services.views.IEDBPredPresenter;
 import epiprot.services.views.MSAPresenter;
+import epiprot.services.views.PhosphoSitePresenter;
 import epiprot.services.views.SelectPDBPresenter;
 import epiprot.services.views.SelectPDBView;
 import epiprot.services.views.SiftsPresenter;
 import epiprot.services.views.SiftsView;
 import uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry;
-import uk.ac.ebi.kraken.model.blast.columns.BlastSortingColumnType;
-import uk.ac.ebi.kraken.model.blast.parameters.DatabaseOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.ExpectedThreshold;
-import uk.ac.ebi.kraken.model.blast.parameters.FilterOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.FormatOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.MaxNumberResultsOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.ScoreOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.SensitivityValue;
-import uk.ac.ebi.kraken.model.blast.parameters.SimilarityMatrixOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.SortOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.StatsOptions;
-import uk.ac.ebi.kraken.model.blast.parameters.TopcomboN;
 import uk.ac.ebi.kraken.uuw.services.remoting.blast.BlastData;
-import uk.ac.ebi.kraken.uuw.services.remoting.blast.BlastHit;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.UniProtHit;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DatabaseOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DropOffOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ExpectationOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.FilterOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.MatrixOption;
+import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ScoreCutoffOption;
 
 public class Presenter {
 	
@@ -84,6 +73,7 @@ public class Presenter {
 	    JMenuItem psipred();
 	    JMenuItem jpred();
 	    JMenuItem pdbStructure();
+	    JMenuItem ptms();
 	   
 	    JMenuItem foregroundColor();
 	    JMenuItem backgroundColor();
@@ -107,11 +97,9 @@ public class Presenter {
 	
 	public interface Model {
 		Line fetchProteinLine(String proteinId);
-		List<BlastHit<UniProtEntry>> fetchBlastHits(String proteinAcc, DatabaseOptions databaseOptions, SimilarityMatrixOptions similarityMatrixOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies,boolean limitToSwissProtDB);
-		List<BlastHit<UniProtEntry>> fetchBlastHits(String proteinAcc, DatabaseOptions databaseOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB);
-		BlastData<UniProtEntry> fetchBlastData(String proteinAcc, List<DatabaseOptions> dbOptions);
+		ArrayList<UniProtHit> fetchBlastHits(String proteinAcc, DatabaseOption databaseOption, ExpectationOption expectationOption, FilterOption filterOption, DropOffOption dropOffOption, MatrixOption matrixOption, ScoreCutoffOption scoreCutoffOption, boolean isGapAlign, int gapExt, int gapOpen, boolean limitToTargetSpecies,boolean limitToSwissProtDB);
+		BlastData<UniProtEntry> fetchBlastData(String proteinAcc, List<DatabaseOption> dbOptions);
 		LinkedHashMap<String,String> fetchAlignmentProteinMap(String msa, ArrayList<String> proteinAccs);
-		int fetchProteinLength(String proteinAcc);
 	}
 	
 	View view;
@@ -216,7 +204,7 @@ public class Presenter {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				IEDBPredPresenter iedbPredPresenter = new IEDBPredPresenter(Presenter.this,model.fetchProteinLength(proteinAcc));
+				IEDBPredPresenter iedbPredPresenter = new IEDBPredPresenter(Presenter.this);
 			}	
 		});
 		
@@ -291,6 +279,13 @@ public class Presenter {
 			}
 		});
 		
+		view.ptms().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PhosphoSitePresenter phosphoSitePresenter = new PhosphoSitePresenter(Presenter.this);
+			}
+		});
+		
 		view.clearPanes().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -311,33 +306,20 @@ public class Presenter {
 		view.reloadDocument();
 	}
 	
-	public void setBlastHits(DatabaseOptions databaseOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
+	public void setBlastHits(DatabaseOption databaseOption, ExpectationOption expectationOption, FilterOption filterOption, DropOffOption dropOffOption, MatrixOption matrixOption, ScoreCutoffOption scoreCutoffOption, boolean isGapAlign, int gapExt, int gapOpen, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
 		clearBlastPanel();
-		List<BlastHit<UniProtEntry>> blastHits = model.fetchBlastHits(proteinAcc, databaseOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
-		//BlastData<UniProtEntry> blastData = model.fetchBlastData(proteinAcc, dbOptions);
-		for(BlastHit<UniProtEntry> hit: blastHits) {
-			if (!hit.getHit().getAc().equals(proteinAcc)) {
-				SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
+		ArrayList<UniProtHit> blastHits = model.fetchBlastHits(proteinAcc, databaseOption, expectationOption, filterOption, dropOffOption, matrixOption, scoreCutoffOption, isGapAlign, gapExt, gapOpen, limitToTargetSpecies, limitToSwissProtDB);
+		
+		for(UniProtHit hit: blastHits) {
+			if (!hit.getSummary().getEntryId().equals(protein.getUniprotNameId()) && !hit.getSummary().getEntryAc().equals(proteinAcc)) {
+				SelectProteinView spv = new SelectProteinView(hit.getSummary().getEntryAc()+" "+hit.getSummary().getEntryId());
 				SelectProteinPresenter spp = new SelectProteinPresenter(spv);
 				view.proteinPanel().add(spv);
 			}
 		}
 	}
 	
-	public void setBlastHits(DatabaseOptions databaseOptions, SimilarityMatrixOptions similarityMatrixOptions, ExpectedThreshold expectedThreshold, MaxNumberResultsOptions maxNumberResultsOptions, ScoreOptions scoreOptions, SensitivityValue sensitivityValue, SortOptions sortOptions, StatsOptions statsOptions, FormatOptions formatOptions, TopcomboN topcomboN, boolean limitToTargetSpecies, boolean limitToSwissProtDB) {
-		clearBlastPanel();
-		List<BlastHit<UniProtEntry>> blastHits = model.fetchBlastHits(proteinAcc, databaseOptions, similarityMatrixOptions, expectedThreshold, maxNumberResultsOptions, scoreOptions, sensitivityValue, sortOptions, statsOptions, formatOptions, topcomboN, limitToTargetSpecies, limitToSwissProtDB);
-		//BlastData<UniProtEntry> blastData = model.fetchBlastData(proteinAcc, dbOptions);
-		for(BlastHit<UniProtEntry> hit: blastHits) {
-			if (!hit.getHit().getAc().equals(proteinAcc)) {
-				SelectProteinView spv = new SelectProteinView(hit.getHit().getAc()+" "+hit.getHit().getHitId());
-				SelectProteinPresenter spp = new SelectProteinPresenter(spv);
-				view.proteinPanel().add(spv);
-			}
-		}
-	}
-	
-	private void clearBlastPanel() {
+	public void clearBlastPanel() {
 		for(int i = view.proteinPanel().getComponentCount()-1; i > 0 ; i--) {
 			msaProteinList.clear();
 			view.proteinPanel().remove(i);
