@@ -50,15 +50,23 @@ public class SiftsPresenter {
 						System.out.println(aminoAcid.toString());
 					}
 					String line = "";
-					String mainLine = presenter.getMainLine();
-					for(int i = 0; i < mainLine.length(); i++) {
+					for(int i = 0; i < presenter.protein.getSequence().length(); i++) {
 						line = line + "-";
 					}
+					
 					for(SiftAminoAcid aa: aaList) {
 						if(aa.getSecondaryStructure() != null) {
 							line = line.substring(0,aa.getPosition()-1)+aa.getSecondaryStructure()+line.substring(aa.getPosition());
 						}
 					}
+					
+					String mainLine = presenter.getMainLine();
+					for(int i = 0; i < mainLine.length(); i++) {
+						if(mainLine.charAt(i) == '-') {
+							line = new StringBuilder(line).insert(i, ' ').toString();
+						}
+					}
+					
 					System.out.println("PDB: "+pdbEntry.getPdbId() +"|"+ line);
 					presenter.insertLineAboveTarget("PDB: "+pdbEntry.getPdbId(), line);
 				}

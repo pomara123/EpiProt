@@ -28,6 +28,8 @@ import epiprot.services.ssp.JPredService;
 import epiprot.services.ssp.PsiPredAminoAcid;
 import epiprot.services.ssp.PsiPredService;
 import epiprot.services.uniprot.PDBentry;
+import epiprot.services.uniprot.UniProtFeature;
+import epiprot.services.views.ABCPredPresenter;
 import epiprot.services.views.BlastPresenter;
 import epiprot.services.views.IEDBPredPresenter;
 import epiprot.services.views.MSAPresenter;
@@ -74,6 +76,7 @@ public class Presenter {
 	    JMenuItem jpred();
 	    JMenuItem pdbStructure();
 	    JMenuItem ptms();
+	    JMenuItem subCellularLocation();
 	   
 	    JMenuItem foregroundColor();
 	    JMenuItem backgroundColor();
@@ -172,6 +175,7 @@ public class Presenter {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				ABCPredPresenter abcPredPresenter = new ABCPredPresenter(Presenter.this);
 				
 			}	
 		});
@@ -286,6 +290,82 @@ public class Presenter {
 			}
 		});
 		
+		view.subCellularLocation().addActionListener(new ActionListener() {
+			/*
+			 * (non-Javadoc)
+			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+			 * 
+			 * This service creates two lines:
+			 * 1) Subcellular location
+			 * 		a) Topological Domain
+			 * 			- Extracellular: green
+			 * 			- Cytoplasmic: yellow
+			 * 			- other: blue
+			 * 		c) Transmembrane: red
+			 * 		d) Intramembrane: purple
+			 * 2) Protein Processing  
+			 * 		a) Signal Peptide: red
+			 * 		b) Propeptide: purple
+			 * 		c) Chain: green
+			 */
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				ArrayList<LineElement> subCellularLineList = getLineList();
+				ArrayList<LineElement> proteinProcessLineList = getLineList();
+				
+				//String subCellularLine = getDashLine();
+				//String proteinProcessLine = getDashLine();
+				
+				ArrayList<UniProtFeature> features = protein.getSubcellularFeatures();
+				for (UniProtFeature feature:features) {
+					if (feature.getUniprotType().equals(UniProtFeature.TOPOLOGICAL_DOMAIN)) {
+						if (feature.getDescription().equals(UniProtFeature.EXTRACELLULAR)) {
+							subCellularLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,subCellularLineList,"green");
+						}
+						else if (feature.getDescription().equals(UniProtFeature.CYTOPLASMIC)) {
+							subCellularLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,subCellularLineList,"yellow");
+						}
+						else {
+							subCellularLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,subCellularLineList,"blue");
+						}
+					}
+					else if(feature.getUniprotType().equals(UniProtFeature.INTRAMEMBRANE_REGION)) {
+						subCellularLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,subCellularLineList,"purple");
+					}
+					else if(feature.getUniprotType().equals(UniProtFeature.TRANSMEMBRANE_REGION)) {
+						subCellularLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,subCellularLineList,"red");
+					}
+					else if(feature.getUniprotType().equals(UniProtFeature.SIGNAL_PEPTIDE)) {
+						proteinProcessLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,proteinProcessLineList,"red");
+					}
+					else if(feature.getUniprotType().equals(UniProtFeature.PROPEPTIDE)) {
+						proteinProcessLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,proteinProcessLineList,"purple");
+					}
+					else if(feature.getUniprotType().equals(UniProtFeature.CHAIN)) {
+						proteinProcessLineList = addBlocks(feature.getBeginPosition()-1,feature.getEndPosition()-1,proteinProcessLineList,"green");
+					}
+				}
+								
+				String mainLine = getMainLine();
+				
+								
+				for(int i = 0; i < mainLine.length(); i++) {
+					if (mainLine.charAt(i) == '-') {
+						subCellularLineList.add(i,new LineElement(' '));
+						proteinProcessLineList.add(i,new LineElement(' '));
+					}
+				}
+				System.out.println("test1");
+				for(int i = 0; i < subCellularLineList.size(); i++) {
+					System.out.println(subCellularLineList.get(i).toString()+i);
+				}
+				insertLineAboveTarget("Sub-Cellular Location", getInsertLine(subCellularLineList));
+				insertLineAboveTarget("Protein Processing", getInsertLine(proteinProcessLineList));				
+				
+			}
+		});
+		
 		view.clearPanes().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -293,6 +373,131 @@ public class Presenter {
 			}
 		});
 			
+	}
+	
+	private String getInsertLine(ArrayList<LineElement> lineList) {
+		String line = "";
+		for(int i = 0; i < lineList.size()-1; i++) {
+			LineElement le = lineList.get(i);
+			System.out.println(le.toString()+i);
+			if(le.getColor() == null){
+				line = line + le.getCharacter();
+			}
+			else {
+				ListPlusPosition lpp = getColoredBlocks(lineList,i);
+				line = line + lpp.line;
+				System.out.println(line);
+
+				i = lpp.position;
+			}
+		}
+		System.out.println("test2");
+
+		return line;
+	}
+	
+	private ListPlusPosition getColoredBlocks(ArrayList<LineElement>lineList,int begin) {
+		String color = lineList.get(begin).getColor();
+		System.out.println("&&&"+color);
+		String coloredBlocks = "<font color=\""+color+"\">";
+		ListPlusPosition lpp = new ListPlusPosition();
+
+		loop:
+		for(int i = begin; i < lineList.size(); i++) {
+			//System.out.print(lineList.get(i).getColor());
+			//System.out.print(" "+lineList.get(i).getColor().equals(color)+" ");
+			if(lineList.get(i).getColor() != null && lineList.get(i).getColor().equals(color)) {
+				System.out.println(i+"***"+lineList.get(i).toString());
+				coloredBlocks = coloredBlocks + lineList.get(i).getCharacter();
+			} 
+			else {				
+				lpp.position = i-1;				
+				break loop;
+			}
+			
+			if(i == lineList.size()-1) {
+				lpp.position = lineList.size();
+			}
+		}
+		coloredBlocks = coloredBlocks + "</font>";
+		lpp.line = coloredBlocks;
+		System.out.println(lpp.toString());
+		System.out.println("test1a");
+
+		return lpp;
+	}
+	
+	private ArrayList<LineElement> getLineList() {
+		ArrayList<LineElement> lineList = new ArrayList<LineElement>();
+		for(int i = 0; i < protein.getSequence().length(); i++) {
+			LineElement le = new LineElement();
+			le.setCharacter('-');
+			lineList.add(le);
+		}
+		System.out.println("test3");
+
+		return lineList;
+	}
+	
+	//String.valueOf('\u2588').toString()
+	public ArrayList<LineElement> addBlocks(int begin, int end, ArrayList<LineElement> lineList, String color) {
+		
+		for(int i = begin; i <= end; i++) {
+			lineList.get(i).setCharacter('\u2588');
+			lineList.get(i).setColor(color);
+		}
+		System.out.println("test4");
+
+		return lineList;
+	}
+	
+	
+	//String.valueOf('\u2588').toString()
+	public String addBlocks(int begin, int end, String line, String color) {
+		String blocks = "";
+		for(int i = begin; i <= end; i++) {
+			blocks = blocks + String.valueOf('\u2588');
+		}
+		System.out.println("length of blocks: " + color + blocks.length() + "begin: " + begin);
+		blocks = "<font color=\""+color+"\">"+blocks+"<\font>";
+		StringBuilder sb = new StringBuilder(line);
+		
+		for(int i = 0; i < line.length(); i++) {
+			if(line.charAt(i) == '<') {
+				while(line.charAt(i) != '>') {
+					i++;
+				}
+			}
+			else {
+				line = sb.replace(begin, begin+blocks.length(), blocks).toString();				
+			}
+		}
+		
+		System.out.println("test5");
+
+		return line;
+	}
+	
+	public String getDashLine() {
+		String blockLine = "";
+		for(int i = 0; i < protein.getSequence().length(); i++) {
+			blockLine = blockLine + "-";
+		}
+		System.out.println("test6");
+
+		return blockLine;
+	}
+	
+	public String getInsertLine(String inputLine) {
+		String mainLine = getMainLine();
+		for(int i = 0; i < mainLine.length(); i++) {
+			if(mainLine.charAt(i) == '-') {
+				inputLine = new StringBuilder(inputLine).insert(i, " ").toString();
+			}
+		}
+		System.out.println("test7");
+
+		return inputLine;
 	}
 	
 	public void display() {
@@ -414,5 +619,49 @@ public class Presenter {
     public void deleteLineByProteinAcc(String proteinAcc) {
     	view.deleteLineByProteinAcc(proteinAcc);
     }
-
+    
+    private class LineElement {
+    	private char character;
+    	private int positionInLine;
+    	private String color;
+    	public LineElement(){}
+    	public LineElement(char character){
+    		this.character = character;
+    	}
+    	public LineElement(char character, int positionInLine, String color){
+    		this.setCharacter(character);
+    		this.setPositionInLine(positionInLine);
+    		this.setColor(color);
+    	}
+    	public char getCharacter() {
+			return character;
+		}
+		public void setCharacter(char character) {
+			this.character = character;
+		}
+		public String getColor() {
+			return color;
+		}
+		public void setColor(String color) {
+			this.color = color;
+		}
+		public int getPositionInLine() {
+			return positionInLine;
+		}
+		public void setPositionInLine(int positionInLine) {
+			this.positionInLine = positionInLine;
+		}
+		public String toString() {
+			return character+"|"+color;
+		}
+    }
+    
+    private class ListPlusPosition {
+    	public String line;
+    	public int position;
+    	public ListPlusPosition(){}
+    	public String toString() {
+    		return line+position;
+    	}
+    }
 }

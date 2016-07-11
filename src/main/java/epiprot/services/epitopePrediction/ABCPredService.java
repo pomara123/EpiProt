@@ -124,7 +124,7 @@ public class ABCPredService extends Service {
 		return input;
 	}
 	
-	private ArrayList<ABCPredPeptide> getPeptides() {
+	public ArrayList<ABCPredPeptide> getPeptides() {
 		return peptideList;
 	}
 	
@@ -133,7 +133,8 @@ public class ABCPredService extends Service {
 		abcPredService.run();
 		ArrayList<ABCPredPeptide> peptideList = abcPredService.getPeptides();
 		for(ABCPredPeptide p: peptideList) {
-			System.out.println(p.toString());
+			String s = String.format("%1$-10s %2$-25s %3$-5d %4$.2f10", p.getRank(), p.getSequence(), p.getStart(), p.getScore());
+			System.out.println(s);
 		}
 	}
 }

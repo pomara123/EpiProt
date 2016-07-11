@@ -120,6 +120,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     JMenuItem jpred = new JMenuItem("JPred Secondary Structure Prediction");
     JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS");
     JMenuItem ptms = new JMenuItem("Post-Translational Modifications");
+    JMenuItem subCellularLocation = new JMenuItem("UniProt Subcellular Location and Protein Processing");
     
     JMenuItem foregroundColor = new JMenuItem("Text Color");
     JMenuItem backgroundColor = new JMenuItem("Background Color");
@@ -378,6 +379,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         servicesMenu.add(pdbStructure);  
         servicesMenu.addSeparator();
         servicesMenu.add(ptms);
+        servicesMenu.addSeparator();
+        servicesMenu.add(subCellularLocation);
     }
 	
 	
@@ -997,5 +1000,11 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+
+	@Override
+	public JMenuItem subCellularLocation() {
+		// TODO Auto-generated method stub
+		return subCellularLocation;
 	}
 }
