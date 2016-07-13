@@ -65,7 +65,7 @@ public class ABCPredView extends JFrame implements ABCPredPresenter.View  {
 		
 		textField = new JTextField();
 		getContentPane().add(textField, "4, 10, fill, default");
-		textField.setText("0.7");
+		textField.setText("0.85");
 		textField.setColumns(10);
 		
 		chckbxOverlappingFilter = new JCheckBox("Overlapping filter? (check = on, uncheck = off)");

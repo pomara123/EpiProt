@@ -30,6 +30,7 @@ import epiprot.services.ssp.PsiPredService;
 import epiprot.services.uniprot.PDBentry;
 import epiprot.services.uniprot.UniProtFeature;
 import epiprot.services.views.ABCPredPresenter;
+import epiprot.services.views.BcePredPresenter;
 import epiprot.services.views.BlastPresenter;
 import epiprot.services.views.IEDBPredPresenter;
 import epiprot.services.views.MSAPresenter;
@@ -184,7 +185,7 @@ public class Presenter {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				BcePredPresenter bcePredPresenter = new BcePredPresenter(Presenter.this);
 			}	
 		});
 		
