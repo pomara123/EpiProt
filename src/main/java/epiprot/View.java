@@ -111,15 +111,15 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     
     JMenuItem blast = new JMenuItem("BLAST");
     JMenuItem msa = new JMenuItem("Alignment");
-    JMenuItem iedbPrediction = new JMenuItem("IEDB Epitope Prediction");
-    JMenuItem abcpred = new JMenuItem("ABCPred Epitope Prediction");
-    JMenuItem bcepred = new JMenuItem("BcePred Epitope Prediction");
-    JMenuItem discotopePred = new JMenuItem("Discotope Epitope Prediction");
-    JMenuItem elliproPred = new JMenuItem("Ellipro Epitope Prediction");
+    JMenuItem iedbPrediction = new JMenuItem("IEDB Epitope Prediction...");
+    JMenuItem abcpred = new JMenuItem("ABCPred Epitope Prediction...");
+    JMenuItem bcepred = new JMenuItem("BcePred Epitope Prediction...");
+    JMenuItem discotopePred = new JMenuItem("Discotope Epitope Prediction...");
+    JMenuItem elliproPred = new JMenuItem("Ellipro Epitope Prediction...");
     JMenuItem psipred = new JMenuItem("PsiPred Secondary Structure Prediction");
     JMenuItem jpred = new JMenuItem("JPred Secondary Structure Prediction");
-    JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS");
-    JMenuItem ptms = new JMenuItem("Post-Translational Modifications");
+    JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS...");
+    JMenuItem ptms = new JMenuItem("Post-Translational Modifications...");
     JMenuItem subCellularLocation = new JMenuItem("UniProt Subcellular Location and Protein Processing");
     
     JMenuItem foregroundColor = new JMenuItem("Text Color");
@@ -370,8 +370,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         servicesMenu.add(iedbPrediction);
         servicesMenu.add(abcpred);
         servicesMenu.add(bcepred);
-        servicesMenu.add(discotopePred);
-        servicesMenu.add(elliproPred);
+        //servicesMenu.add(discotopePred);
+        //servicesMenu.add(elliproPred);
         servicesMenu.addSeparator();
         servicesMenu.add(psipred);
         servicesMenu.add(jpred);

@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JButton;
+import java.awt.Font;
 
 public class BcePredView extends JFrame implements BcePredPresenter.View {
 	private JTextField hydrophilicityTextField;
@@ -35,6 +36,7 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 	private JCheckBox combinedCheckBox;
 	private JCheckBox chckbxSelectAll;
 	private JButton btnSubmit;
+	private JLabel lblNumbersMustBe;
 
 	public BcePredView() {
 		setTitle("BcePred");
@@ -48,7 +50,7 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		scrollPane.setViewportView(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] {260, 286};
-		gbl_panel.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+		gbl_panel.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		gbl_panel.columnWeights = new double[]{1.0,1.0};
 		panel.setLayout(gbl_panel);
 		
@@ -195,7 +197,7 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		gbc_panel_5.gridx = 1;
 		gbc_panel_5.gridy = 0;
 		panel.add(panel_5, gbc_panel_5);
-		TitledBorder oGlcnacTitle = new TitledBorder("O-Glcnac");
+		TitledBorder oGlcnacTitle = new TitledBorder("Flexibility");
 		panel_5.setBorder(oGlcnacTitle);
 		GridBagLayout gbl_panel_5 = new GridBagLayout();
 		gbl_panel_5.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
@@ -228,7 +230,7 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		gbc_panel_6.gridx = 1;
 		gbc_panel_6.gridy = 1;
 		panel.add(panel_6, gbc_panel_6);
-		TitledBorder sumoylationTitle = new TitledBorder("Sumoylation");
+		TitledBorder sumoylationTitle = new TitledBorder("Turns");
 		panel_6.setBorder(sumoylationTitle);
 		GridBagLayout gbl_panel_6 = new GridBagLayout();
 		gbl_panel_6.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
@@ -261,7 +263,7 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		gbc_panel_7.gridx = 1;
 		gbc_panel_7.gridy = 2;
 		panel.add(panel_7, gbc_panel_7);
-		TitledBorder ubiquitinationTitle = new TitledBorder("Ubiquitination");
+		TitledBorder ubiquitinationTitle = new TitledBorder("Polarity");
 		panel_7.setBorder(ubiquitinationTitle);
 		GridBagLayout gbl_panel_7 = new GridBagLayout();
 		gbl_panel_7.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
@@ -310,12 +312,14 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		gbc_textField_13.gridy = 0;
 		panel_8.add(combinedTextField, gbc_textField_13);
 		combinedTextField.setColumns(10);
+		combinedTextField.setEnabled(false);
 		
 		combinedCheckBox = new JCheckBox("");
 		GridBagConstraints gbc_checkBox_5 = new GridBagConstraints();
 		gbc_checkBox_5.gridx = 4;
 		gbc_checkBox_5.gridy = 0;
 		panel_8.add(combinedCheckBox, gbc_checkBox_5);
+		combinedCheckBox.setEnabled(false);
 		
 		chckbxSelectAll = new JCheckBox("Select All");
 		GridBagConstraints gbc_chckbxSelectAll = new GridBagConstraints();
@@ -333,6 +337,10 @@ public class BcePredView extends JFrame implements BcePredPresenter.View {
 		gbc_panel_9.gridy = 5;
 		gbc_panel_9.gridwidth = 2;
 		panel.add(panel_9, gbc_panel_9);
+		
+		lblNumbersMustBe = new JLabel("Numbers must be between -3 and 3. At least two checkboxes must be selected in order to select \"Combined\".");
+		lblNumbersMustBe.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		panel_9.add(lblNumbersMustBe);
 		
 		btnSubmit = new JButton("Submit");
 		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();

@@ -3,8 +3,6 @@ package epiprot.services.views;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -14,18 +12,15 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import epiprot.Presenter;
-import epiprot.Protein;
 import epiprot.services.epitopePrediction.BcePredAminoAcid;
 import epiprot.services.epitopePrediction.BcePredService;
-import epiprot.services.phosphosite.PhosphoSiteAminoAcid;
-import epiprot.services.phosphosite.PhosphoSitePTM;
-import epiprot.services.phosphosite.PhosphoSiteService;
 import epiprot.services.uniprot.UniProtAminoAcid;
-import epiprot.services.uniprot.UniProtPTM;
 
 public class BcePredPresenter {
 	
 	Presenter presenter;
+	
+	String mainLine;
 	
 	private String hydro = "";
 	private String flexi = "";
@@ -77,7 +72,7 @@ public class BcePredPresenter {
 		view.btnSubmit().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				mainLine = presenter.getMainLine();
 				for(int i = 0; i < presenter.protein.getSequence().length(); i++) {
 					addDashToAllLines();
 				}
@@ -213,35 +208,35 @@ public class BcePredPresenter {
 				System.out.println("max"+max);
 				
 				
-				if (containsAnythingButDash(access)) {
-					presenter.insertLineAboveTarget("BcePred: Accessible (Emini)", getInsertLine(access));
+				if (containsAnythingButDashAndZero(access)) {
+					presenter.insertLineAboveTarget("BcePred: Accessible (Emini)", access);
 				}
-				if (containsAnythingButDash(antipro)) {
-					presenter.insertLineAboveTarget("BcePred: Antigenic Propensity (Kolaskar)", getInsertLine(antipro));
+				if (containsAnythingButDashAndZero(antipro)) {
+					presenter.insertLineAboveTarget("BcePred: Antigenic Propensity (Kolaskar)", antipro);
 				}
-				if (containsAnythingButDash(flexi)) {
-					presenter.insertLineAboveTarget("BcePred: Flexibility (Karplus)", getInsertLine(flexi));
+				if (containsAnythingButDashAndZero(flexi)) {
+					presenter.insertLineAboveTarget("BcePred: Flexibility (Karplus)", flexi);
 				}
-				if (containsAnythingButDash(hydro)) {
-					presenter.insertLineAboveTarget("BcePred: Hydrophilicity (Parker)", getInsertLine(hydro));
+				if (containsAnythingButDashAndZero(hydro)) {
+					presenter.insertLineAboveTarget("BcePred: Hydrophilicity (Parker)", hydro);
 				}
-				if (containsAnythingButDash(polar)) {
-					presenter.insertLineAboveTarget("BcePred: Polarity (Ponnuswamy)", getInsertLine(polar));
+				if (containsAnythingButDashAndZero(polar)) {
+					presenter.insertLineAboveTarget("BcePred: Polarity (Ponnuswamy)", polar);
 				}
-				if (containsAnythingButDash(surface)) {
-					presenter.insertLineAboveTarget("BcePred: Exposed Surface (Janin)", getInsertLine(surface));
+				if (containsAnythingButDashAndZero(surface)) {
+					presenter.insertLineAboveTarget("BcePred: Exposed Surface (Janin)", surface);
 				}
-				if (containsAnythingButDash(turns)) {
-					presenter.insertLineAboveTarget("BcePred: Turns (Pellequer)", getInsertLine(turns));
+				if (containsAnythingButDashAndZero(turns)) {
+					presenter.insertLineAboveTarget("BcePred: Turns (Pellequer)", turns);
 				}
-				if (containsAnythingButDash(average)) {
-					presenter.insertLineAboveTarget("BcePred: Average", getInsertLine(average));
+				if (containsAnythingButDashAndZero(average)) {
+					presenter.insertLineAboveTarget("BcePred: Average", average);
 				}
-				if (containsAnythingButDash(min)) {
-					presenter.insertLineAboveTarget("BcePred: Min", getInsertLine(min));
+				if (containsAnythingButDashAndZero(min)) {
+					presenter.insertLineAboveTarget("BcePred: Min", min);
 				}
-				if (containsAnythingButDash(max)) {
-					presenter.insertLineAboveTarget("BcePred: Max", getInsertLine(max));
+				if (containsAnythingButDashAndZero(max)) {
+					presenter.insertLineAboveTarget("BcePred: Max", max);
 				}
 			}
 		});
@@ -257,12 +252,12 @@ public class BcePredPresenter {
 		
 		view.accessibilityCheckBox().addActionListener(new CheckBoxListener(view));
 		view.antegenicPropensityCheckBox().addActionListener(new CheckBoxListener(view));
-		view.combinedCheckBox().addActionListener(new CheckBoxListener(view));
 		view.exposedSurfaceCheckBox().addActionListener(new CheckBoxListener(view));
 		view.flexibilityCheckBox().addActionListener(new CheckBoxListener(view));
 		view.hydrophilicityCheckBox().addActionListener(new CheckBoxListener(view));
 		view.polarityCheckBox().addActionListener(new CheckBoxListener(view));
 		view.turnsCheckBox().addActionListener(new CheckBoxListener(view));		
+		view.chckbxSelectAll().addActionListener(new CheckBoxListener(view));
 		view.chckbxSelectAll().addActionListener(new ActionListener() {
 
 			@Override
@@ -292,14 +287,36 @@ public class BcePredPresenter {
 				}
 			}
 			
+			
 		});
+		
+		view.combinedCheckBox().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+
 	}
 	
 	private String getLine(ArrayList<LineElement> lineList) {
 		String line = "";
+		for(int i = 0; i < mainLine.length(); i++) {
+			System.out.print(mainLine.charAt(i) == '-' ? "*" : "f");
+			if(mainLine.charAt(i) == '-') {
+				lineList.add(i,new LineElement(-1));
+			}
+		}
+		System.out.println();
 		for (LineElement le : lineList) {
-			if(le.color == null) {
-				line = line + le.character;
+			if(le.color == null && le.character != -1) {
+				line = line + le.getCharacter();
+			}
+			else if(le.color == null && le.character == -1) {
+				line = line + " ";
 			}
 			else {
 				line = line + getBlueColoredText(le.character);
@@ -311,24 +328,16 @@ public class BcePredPresenter {
 	private String getBlueColoredText(int text) {
 		return "<font color=\"blue\">"+text+"</font>";
 	}
-	private boolean containsAnythingButDash(String s) {
+	private boolean containsAnythingButDashAndZero(String s) {
 		for(int i = 0; i < s.length(); i++) {
-			if (s.charAt(i) != '-') {return true;}
+			if (s.charAt(i) != '-' && s.charAt(i) != '0') {return true;}
 		}
 		return false;
 	}
 	
-	private String getUniProtLine() {
-		String line = "";
-		for(int i = 0; i < presenter.protein.getSequence().length(); i++) {
-			line = line + "-";
-		}
-		return line;
-	}
-	
-	private boolean isInteger(String s) {
+	private boolean isDouble(String s) {
 		try { 
-	        Integer.parseInt(s); 
+	        Double.parseDouble(s); 
 	    } catch(NumberFormatException e) { 
 	        return false; 
 	    } catch(NullPointerException e) {
@@ -339,7 +348,7 @@ public class BcePredPresenter {
 	}
 	
 	public void checkTextField(String text) {
-		if(isInteger(text) && Integer.parseInt(text) >= 0) {
+		if(isDouble(text) && Double.parseDouble(text) >= -3 && Double.parseDouble(text) <= 3) {
 			view.btnSubmit().setEnabled(true);
 		}
 		else {
@@ -347,14 +356,20 @@ public class BcePredPresenter {
 		}
 	}
 	
-	public String getInsertLine(String inputLine) {
-		String mainLine = presenter.getMainLine();
-		for(int i = 0; i < mainLine.length(); i++) {
-			if(mainLine.charAt(i) == '-') {
-				inputLine = new StringBuilder(inputLine).insert(i, " ").toString();
-			}
-		}
-		return inputLine;
+	public boolean isTextFieldOK(JTextField textField) {
+		return (isDouble(textField.getText()) && Double.parseDouble(textField.getText()) >= -3 && Double.parseDouble(textField.getText()) <= 3);
+	}
+	
+	public boolean isAllTextFieldsOK() {
+		if(!isTextFieldOK(view.accessibilityTextField())) {return false;}
+		if(!isTextFieldOK(view.antegenicPropensityTextField())) {return false;}
+		if(!isTextFieldOK(view.combinedTextField())) {return false;}
+		if(!isTextFieldOK(view.exposedSurfaceTextField())) {return false;}
+		if(!isTextFieldOK(view.flexibilityTextField())) {return false;}
+		if(!isTextFieldOK(view.hydrophilicityTextField())) {return false;}
+		if(!isTextFieldOK(view.polarityTextField())) {return false;}
+		if(!isTextFieldOK(view.turnsTextField())) {return false;}
+		return true;
 	}
 	
 	public ArrayList<UniProtAminoAcid> getAminoAcids() {
@@ -417,25 +432,41 @@ public class BcePredPresenter {
 	
 	public class CheckBoxListener implements ActionListener {
 		
-		View phosphoSiteView;
+		View bcePredView;
 		
-		public CheckBoxListener(View phosphoSiteView) {
-			this.phosphoSiteView = phosphoSiteView;
+		public CheckBoxListener(View bcePredView) {
+			this.bcePredView = bcePredView;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			if (phosphoSiteView.accessibilityCheckBox().isSelected() || phosphoSiteView.antegenicPropensityCheckBox().isSelected() || phosphoSiteView.combinedCheckBox().isSelected() ||
-					phosphoSiteView.exposedSurfaceCheckBox().isSelected() || phosphoSiteView.flexibilityCheckBox().isSelected() || 
-					phosphoSiteView.hydrophilicityCheckBox().isSelected() || phosphoSiteView.polarityCheckBox().isSelected() || phosphoSiteView.turnsCheckBox().isSelected()) {
+			if ((bcePredView.accessibilityCheckBox().isSelected() || bcePredView.antegenicPropensityCheckBox().isSelected() ||
+					bcePredView.exposedSurfaceCheckBox().isSelected() || bcePredView.flexibilityCheckBox().isSelected() || 
+					bcePredView.hydrophilicityCheckBox().isSelected() || bcePredView.polarityCheckBox().isSelected() || bcePredView.turnsCheckBox().isSelected()) &&
+					isAllTextFieldsOK()) {
 				view.btnSubmit().setEnabled(true);
 			}
 			else {
 				view.btnSubmit().setEnabled(false);
 			}
+			
+			
+			if(toInt(view.hydrophilicityCheckBox().isSelected())+toInt(view.flexibilityCheckBox().isSelected())+toInt(view.accessibilityCheckBox().isSelected())+toInt(view.turnsCheckBox().isSelected())+toInt(view.exposedSurfaceCheckBox().isSelected())+toInt(view.polarityCheckBox().isSelected())+toInt(view.antegenicPropensityCheckBox().isSelected()) >= 2) {
+				view.combinedCheckBox().setEnabled(true);
+				view.combinedTextField().setEnabled(true);
+			}
+			else {
+				view.accessibilityCheckBox().setSelected(false);
+				view.combinedCheckBox().setEnabled(false);
+				view.combinedTextField().setEnabled(false);
+			}
 		}
 		
+	}
+	
+	private int toInt(boolean bool) {
+		return bool ? 1 : 0;
 	}
 	
 	private class LineElement {
@@ -482,4 +513,6 @@ public class BcePredPresenter {
     		return line+position;
     	}
     }
+    
+    
 }

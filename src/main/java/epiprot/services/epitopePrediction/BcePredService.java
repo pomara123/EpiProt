@@ -106,11 +106,11 @@ public class BcePredService extends Service {
 		    
 		    HtmlSelect physioChemicalSelect = form.getSelectByName("propno");
 		    List<HtmlOption> optionList = physioChemicalSelect.getOptions();
-		    if (selectAll) {
+		    //if (selectAll) {
 			    for(HtmlOption option: optionList) {
 			    	option.setSelected(true);
 			    }
-		    }
+		   /* }
 		    else {
 			    optionList.get(0).setSelected(selectHydro);
 			    optionList.get(1).setSelected(selectFlexi);
@@ -119,7 +119,7 @@ public class BcePredService extends Service {
 			    optionList.get(4).setSelected(selectSurface);
 			    optionList.get(5).setSelected(selectPolar);
 			    optionList.get(6).setSelected(selectAntipro);
-		    }
+		    }*/
 		    // Now submit the form by clicking the button and get back the second page.
 		    HtmlPage page2 = button.click();
 		    
