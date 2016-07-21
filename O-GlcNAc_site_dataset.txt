@@ -1,4 +1,4 @@
-061616
+070316
 PhosphoSitePlus(R) (PSP) was created by Cell Signaling Technology Inc. It is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. When using PSP data or analyses in printed publications or in online resources, the following acknowledgements must be included: (a) the words "PhosphoSitePlus(R), www.phosphosite.org" must be included at appropriate places in the text or webpage, and (b) the following citation must be included in the bibliography: "Hornbeck PV, Zhang B, Murray B, Kornhauser JM, Latham V, Skrzypek E PhosphoSitePlus, 2014: mutations, PTMs and recalibrations. Nucleic Acids Res. 2015 43:D512-20. PMID: 25514926."
 
 PROTEIN	ACC_ID	GENE	HU_CHR_LOC	MOD_RSD	SITE_GRP_ID	ORGANISM	MW_kD	DOMAIN	SITE_+/-7_AA	LT_LIT	MS_LIT	MS_CST	CST_CAT#
@@ -470,9 +470,9 @@ FRRS1L	B1AXV0	Frrs1l		T65-gl	27705710	mouse	32.51		RHDsSYGtFAsEFYD		1
 FRRS1L	B1AXV0	Frrs1l		S68-gl	27705713	mouse	32.51		sSYGtFAsEFYDLRY		1		
 FRRS1L	B1AXV0	Frrs1l		T85-gl	27705716	mouse	32.51		EEGYPFPtAPPVDPF		1		
 FRS3	Q91WJ0	Frs3		S439-gl	27705980	mouse	53.98		GPQNPSVsGAPGPTP		1		
-FZR1	Q9UM11	FZR1	19p13.3	S39-gl	55596601	human	55.18		tPAssPVssPsKHGD	1			
-FZR1	Q9UM11	FZR1	19p13.3	S40-gl	55596602	human	55.18		PAssPVssPsKHGDR	1			
-FZR1	Q9UM11	FZR1	19p13.3	S42-gl	55596600	human	55.18		ssPVssPsKHGDRFI	1			
+FZR1	Q9UM11	FZR1	19p13.3	S39-gl	55596601	human	55.18		tPAssPVssPsKHGD	1	1		
+FZR1	Q9UM11	FZR1	19p13.3	S40-gl	55596602	human	55.18		PAssPVssPsKHGDR	1	1		
+FZR1	Q9UM11	FZR1	19p13.3	S42-gl	55596600	human	55.18		ssPVssPsKHGDRFI	1	1		
 G-beta 1	P62874	Gnb1		S136-gl	27706064	mouse	37.38		REGNVRVsRELAGHT		1		
 G2	D3YZ21	D430041D05Rik		S221-gl	27705988	mouse	153.38		TTLFLRRssPAPLSA		1		
 G2	D3YZ21	D430041D05Rik		S222-gl	27706004	mouse	153.38		TLFLRRssPAPLSAA		1		
@@ -760,7 +760,7 @@ MRCKA	Q3UU96	Cdc42bpa		S1596-gl	27706374	mouse	195.54		QESRTVFsGSVsIPs		1
 MRLC2V	P08733	Myl2		S15-gl	5316428	rat	18.88		KRLEGGssNVFSMFE	1			
 MTMR1	Q9Z2C4	Mtmr1		T667-gl	27736405	mouse	75.31		HsAtPVHtSV_____		1		
 Myb	P06876	Myb		S454-gl	25794080	mouse	71.42	Cmyb_C	RTPAIKRsILESSPR		1		
-Myc	P01106	MYC	8q24.21	T58-gl	5227903	human	48.80	Myc_N	KkFELLPtPPLsPsR	2			
+Myc	P01106	MYC	8q24.21	T58-gl	5227903	human	48.80	Myc_N	kkFELLPtPPLsPsR	2			
 MYH6	P02563	Myh6		S172-gl	5316400	rat	223.51	Myosin_head	LTDRENQsILITGEs	1			
 MYH6	P02563	Myh6		S179-gl	5316401	rat	223.51	Myosin_head	sILITGEsGAGKTVN	1			
 MYH6	P02563	Myh6		S196-gl	5316402	rat	223.51	Myosin_head	RVIQYFAsIAAIGDR	1			

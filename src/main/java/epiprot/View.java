@@ -111,20 +111,26 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     
     JMenuItem blast = new JMenuItem("BLAST");
     JMenuItem msa = new JMenuItem("Alignment");
-    JMenuItem iedbPrediction = new JMenuItem("IEDB Epitope Prediction");
-    JMenuItem abcpred = new JMenuItem("ABCPred Epitope Prediction");
-    JMenuItem bcepred = new JMenuItem("BcePred Epitope Prediction");
-    JMenuItem discotopePred = new JMenuItem("Discotope Epitope Prediction");
-    JMenuItem elliproPred = new JMenuItem("Ellipro Epitope Prediction");
+    JMenuItem iedbPrediction = new JMenuItem("IEDB Epitope Prediction...");
+    JMenuItem abcpred = new JMenuItem("ABCPred Epitope Prediction...");
+    JMenuItem bcepred = new JMenuItem("BcePred Epitope Prediction...");
+    JMenuItem discotopePred = new JMenuItem("Discotope Epitope Prediction...");
+    JMenuItem elliproPred = new JMenuItem("Ellipro Epitope Prediction...");
     JMenuItem psipred = new JMenuItem("PsiPred Secondary Structure Prediction");
     JMenuItem jpred = new JMenuItem("JPred Secondary Structure Prediction");
-    JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS");
-    JMenuItem ptms = new JMenuItem("Post-Translational Modifications");
+    JMenuItem pdbStructure = new JMenuItem("PDB Structure from SIFTS...");
+    JMenuItem ptms = new JMenuItem("Post-Translational Modifications...");
+    JMenuItem subCellularLocation = new JMenuItem("UniProt Subcellular Location and Protein Processing");
     
     JMenuItem foregroundColor = new JMenuItem("Text Color");
     JMenuItem backgroundColor = new JMenuItem("Background Color");
     
     JMenuItem clearPanes = new JMenuItem("Clear View");
+    
+    JMenuItem openItem = new JMenuItem("Open",new ImageIcon("open.png"));
+    
+    ArrayList<Header> headers;
+
     
 	public View() {
 		//setUIFont (new javax.swing.plaf.FontUIResource("monospaced",Font.PLAIN,10));
@@ -157,7 +163,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		addWindowListener(new FrameListener());
 		
 		setTitle("EpiProt");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setMinimumSize(new Dimension(1000, 600));
         getContentPane().setLayout(new BorderLayout(0, 0));        
         JToolBar toolBar = new JToolBar("Tools",JToolBar.HORIZONTAL);
@@ -256,7 +262,6 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		//file
 		JMenuItem newItem = new JMenuItem("New", new ImageIcon("whatsnew-bang.gif"));
 		newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		JMenuItem openItem = new JMenuItem("Open",new ImageIcon("open.png"));
 		openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		JMenuItem saveItem = new JMenuItem("Save",new ImageIcon("save.png"));
 		saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -340,7 +345,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		JMenuItem cyanTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Cyan",Color.cyan));
 		JMenuItem magentaTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Magenta",Color.magenta));
 		JMenuItem blackTextItem = new JMenuItem(new StyledEditorKit.ForegroundAction("Black",Color.black));
-
+		/*
 		redTextItem.setIcon(new ImageIcon("red.png"));
 		orangeTextItem.setIcon(new ImageIcon("orange.png"));
 		yellowTextItem.setIcon(new ImageIcon("yellow.png"));
@@ -349,7 +354,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		cyanTextItem.setIcon(new ImageIcon("cyan.png"));
 		magentaTextItem.setIcon(new ImageIcon("magenta.png"));
 		blackTextItem.setIcon(new ImageIcon("black.png"));
-
+		*/
 		colorMenu.add(redTextItem);
 		colorMenu.add(orangeTextItem);
 		colorMenu.add(yellowTextItem);
@@ -369,8 +374,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         servicesMenu.add(iedbPrediction);
         servicesMenu.add(abcpred);
         servicesMenu.add(bcepred);
-        servicesMenu.add(discotopePred);
-        servicesMenu.add(elliproPred);
+        //servicesMenu.add(discotopePred);
+        //servicesMenu.add(elliproPred);
         servicesMenu.addSeparator();
         servicesMenu.add(psipred);
         servicesMenu.add(jpred);
@@ -378,6 +383,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
         servicesMenu.add(pdbStructure);  
         servicesMenu.addSeparator();
         servicesMenu.add(ptms);
+        servicesMenu.addSeparator();
+        servicesMenu.add(subCellularLocation);
     }
 	
 	
@@ -757,7 +764,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		if (actionCommand.compareTo("New") == 0){
 			startNewDocument();
 		} else if (actionCommand.compareTo("Open") == 0){
-			openDocument();
+			//openDocument();
 		} else if (actionCommand.compareTo("Save") == 0){
 			saveDocument();
 		} else if (actionCommand.compareTo("Save As") == 0){
@@ -837,7 +844,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 			editorDocument.addUndoableEditListener(undoHandler);
 			editorPane.setDocument(editorDocument);
 			
-			ArrayList<Header> headers = new ArrayList<Header>();
+			headers = new ArrayList<Header>();
 			org.jsoup.nodes.Document doc = Jsoup.parse(editorTempFile,null);
 			org.jsoup.select.Elements pres = doc.select("pre");
 			int i = 0;
@@ -854,6 +861,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 			    		System.out.format("%s = %s\n", attr.getKey(), attr.getValue());
 			        }
 			    }
+			    
 			    headers.add(header);
 			}
 			
@@ -937,9 +945,11 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 
 	public void exit(){
 		String exitMessage = "Are you sure you want to exit?";
-		if (JOptionPane.showConfirmDialog(this, exitMessage) == JOptionPane.YES_OPTION){
-			System.exit(0);
-		}
+		int reply = JOptionPane.showConfirmDialog(null, exitMessage, "Confirm Exit", JOptionPane.YES_NO_OPTION);
+		System.out.println("reply: "+reply);
+	    if (reply == JOptionPane.YES_OPTION) {
+	      System.exit(0);
+	    }
 	}
 
 	public void clear(){
@@ -977,7 +987,7 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 	    }
 	} 
 	
-	private class Header {
+	public class Header {
 		private String id;
 		private String name;
 		public Header () {}
@@ -997,5 +1007,23 @@ public class View extends JFrame implements Presenter.View, ActionListener {
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+
+	@Override
+	public JMenuItem subCellularLocation() {
+		// TODO Auto-generated method stub
+		return subCellularLocation;
+	}
+
+	@Override
+	public JMenuItem openItem() {
+		// TODO Auto-generated method stub
+		return openItem;
+	}
+
+	@Override
+	public ArrayList<Header> headers() {
+		// TODO Auto-generated method stub
+		return headers;
 	}
 }

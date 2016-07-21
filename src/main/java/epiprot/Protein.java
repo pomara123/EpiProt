@@ -17,6 +17,7 @@ import epiprot.services.uniprot.DBentry;
 import epiprot.services.uniprot.DBproperty;
 import epiprot.services.uniprot.PDBentry;
 import epiprot.services.uniprot.UniProtAminoAcid;
+import epiprot.services.uniprot.UniProtFeature;
 import epiprot.services.uniprot.UniProtPTM;
 import epiprot.services.uniprot.UniprotService;
 
@@ -304,6 +305,39 @@ public class Protein {
     		}
     	}
     	return evidenceArray;
+    }
+    
+    public ArrayList<UniProtFeature> getSubcellularFeatures() {
+    	ArrayList<UniProtFeature> featureList = new ArrayList<UniProtFeature>();
+    	NodeList featureNodeList = getNodeList("feature");
+    	for(int i = 0; i < featureNodeList.getLength(); i++) {
+    		Node featureNode = featureNodeList.item(i);
+    		if(featureNode.getNodeType() == Node.ELEMENT_NODE) {
+    			Element featureElement = (Element) featureNode;
+    			if(featureElement.hasAttribute("type")) {
+    				String featureType = featureElement.getAttribute("type");
+    				if(featureType.equals("topological domain") || featureType.equals("transmembrane region") || 
+    						featureType.equals("intramembrane region") || featureType.equals("signal peptide") ||
+    						featureType.equals("propeptide") || featureType.equals("chain")){
+    					UniProtFeature uniProtFeature = new UniProtFeature();
+    					uniProtFeature.setUniprotType((featureElement.getAttribute("type")).toLowerCase());
+    					uniProtFeature.setDescription((featureElement.getAttribute("description")).toLowerCase());    					
+    					uniProtFeature.setEvidence(getEvidenceArray(featureElement.getAttribute("evidence")));
+    					/*
+    					 * after uniprottype and description have been set, you can set the type.
+    					 * UniProtPTM will pull info from the description and uniprottype in order
+    					 * to set the type and linkage (if applicable)
+    					 */
+    					uniProtFeature.setBeginPosition(Integer.parseInt(((Element) featureElement.getElementsByTagName("begin").item(0)).getAttribute("position")));
+    					uniProtFeature.setEndPosition(Integer.parseInt(((Element) featureElement.getElementsByTagName("end").item(0)).getAttribute("position")));
+    					
+    					//System.out.println(uniProtPTM.getPosition()+":"+uniProtPTM.getBeginPosition()+":"+uniProtPTM.getEndPosition()+":"+uniProtPTM.getUniprotType()+":"+uniProtPTM.getDescription()+":"+uniProtPTM.getEvidence());
+    					featureList.add(uniProtFeature);
+    				}
+    			}    	    		
+    		}    		
+    	}
+    	return featureList;
     }
     
     public static boolean isNumeric(String str)  

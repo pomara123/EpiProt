@@ -2,6 +2,8 @@ package epiprot.services.epitopePrediction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -75,7 +77,7 @@ public class BcePredService extends Service {
 		    HtmlTextArea seqTextField = form.getTextAreaByName("SEQ");
 		    seqTextField.setText(sequence);
 		    
-		    List<HtmlInput> thresholds = form.getInputsByValue("Threshold");
+		    List<HtmlInput> thresholds = form.getInputsByName("Threshold");
 
 		    if (hydrophilicity != null) {
 		    	thresholds.get(0).setValueAttribute(hydrophilicity);
@@ -104,11 +106,11 @@ public class BcePredService extends Service {
 		    
 		    HtmlSelect physioChemicalSelect = form.getSelectByName("propno");
 		    List<HtmlOption> optionList = physioChemicalSelect.getOptions();
-		    if (selectAll) {
+		    //if (selectAll) {
 			    for(HtmlOption option: optionList) {
 			    	option.setSelected(true);
 			    }
-		    }
+		   /* }
 		    else {
 			    optionList.get(0).setSelected(selectHydro);
 			    optionList.get(1).setSelected(selectFlexi);
@@ -117,14 +119,16 @@ public class BcePredService extends Service {
 			    optionList.get(4).setSelected(selectSurface);
 			    optionList.get(5).setSelected(selectPolar);
 			    optionList.get(6).setSelected(selectAntipro);
-		    }
+		    }*/
 		    // Now submit the form by clicking the button and get back the second page.
 		    HtmlPage page2 = button.click();
+		    
 		    String[] page2Array = page2.asText().split("\\r?\\n");
+		    printArray(page2Array);
 		    for(int i = 0; i < page2Array.length; i++) {
 		    	String line = page2Array[i]; 
-		    	if (line.contains("Hydro    Flexi")) {
-		    		line = page2Array[i+1];
+		    	if (line.contains("   Flexi")) {
+		    		line = page2Array[i+2];
 		    		String[] lineArray = line.split("(?=[A-Z])");
 		    		for(int j = 1; j < lineArray.length; j++) {
 		    			String[]lineAttrs = lineArray[j].split("\\s+");
@@ -152,6 +156,7 @@ public class BcePredService extends Service {
 		    		break;
 		    	}		    	
 		    }
+		    calcDisplayedScores();
 		    DomElement element = page2.getElementByName("opt2");
 		    //System.out.println(element.asXml());
 		    webClient.close();
@@ -161,6 +166,239 @@ public class BcePredService extends Service {
 		}	    		
 	}
 	
+	private void calcDisplayedScores() {
+		int tenth = aminoAcids.size()/10;
+    	int remainder = aminoAcids.size()%10;
+    	
+		if(selectHydro) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getHydro() == o2.getHydro())
+	    	             return 0;
+	    	         return o1.getHydro() < o2.getHydro() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setHydroRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setHydroRelative(9);
+	    	}
+		}
+		
+		if(selectFlexi) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getFlexi() == o2.getFlexi())
+	    	             return 0;
+	    	         return o1.getFlexi() < o2.getFlexi() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setFlexiRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setFlexiRelative(9);
+	    	}
+		}
+		
+		if(selectAccess) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getAccess() == o2.getAccess())
+	    	             return 0;
+	    	         return o1.getAccess() < o2.getAccess() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setAccessRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setAccessRelative(9);
+	    	}
+		}
+		
+		if(selectTurns) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getTurns() == o2.getTurns())
+	    	             return 0;
+	    	         return o1.getTurns() < o2.getTurns() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setTurnsRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setTurnsRelative(9);
+	    	}
+		}
+    	
+		if(selectSurface) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getSurface() == o2.getSurface())
+	    	             return 0;
+	    	         return o1.getSurface() < o2.getSurface() ? -1 : 1;
+	    	     }
+	    	});
+			
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setSurfaceRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setSurfaceRelative(9);
+	    	}
+		}
+		
+		if(selectPolar) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getPolar() == o2.getPolar())
+	    	             return 0;
+	    	         return o1.getPolar() < o2.getPolar() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setPolarRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setPolarRelative(9);
+	    	}
+		}
+		
+		if(selectAntipro) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getAntiPro() == o2.getAntiPro())
+	    	             return 0;
+	    	         return o1.getAntiPro() < o2.getAntiPro() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setAntiProRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setAntiProRelative(9);
+	    	}
+		}
+		
+		if(selectAntipro) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getAntiPro() == o2.getAntiPro())
+	    	             return 0;
+	    	         return o1.getAntiPro() < o2.getAntiPro() ? -1 : 1;
+	    	     }
+	    	});
+			
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setAntiProRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setAntiProRelative(9);
+	    	}
+		}
+		
+		if(toInt(selectHydro)+toInt(selectFlexi)+toInt(selectAccess)+toInt(selectTurns)+toInt(selectSurface)+toInt(selectPolar)+toInt(selectAntipro) >= 2) {
+			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getMax() == o2.getMax())
+	    	             return 0;
+	    	         return o1.getMax() < o2.getMax() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setMaxRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setMaxRelative(9);
+	    	}
+	    	
+	    	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getMin() == o2.getMin())
+	    	             return 0;
+	    	         return o1.getMin() < o2.getMin() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setMinRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setMinRelative(9);
+	    	}
+	    	
+	    	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	         if(o1.getAverage() == o2.getAverage())
+	    	             return 0;
+	    	         return o1.getAverage() < o2.getAverage() ? -1 : 1;
+	    	     }
+	    	});
+	    	
+	    	for(int i = 0; i < 10; i++) {
+	    		for (int j = i*tenth; j < (i*tenth)+tenth; j++) {
+	    			aminoAcids.get(j).setAverageRelative(i);
+	    		}
+	    	}
+	    	
+	    	for (int i = aminoAcids.size()-1; i >= aminoAcids.size()-remainder; i--) {
+	    		aminoAcids.get(i).setAverageRelative(9);
+	    	}
+		}
+    	
+    	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+			public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+			    if(o1.getPosition() == o2.getPosition())
+			        return 0;
+			    return o1.getPosition() < o2.getPosition() ? -1 : 1;
+			}
+    	});
+    }
+	
+	private int toInt(boolean bool) {
+		return bool ? 1 : 0;
+	}
+		
 	private String getSequence(String input) {
 		if (input.length() == 6) {
 			Protein protein = new Protein(input,true);
@@ -169,7 +407,7 @@ public class BcePredService extends Service {
 		return input;
 	}
 	
-	private ArrayList<BcePredAminoAcid> getAminoAcids() {
+	public ArrayList<BcePredAminoAcid> getAminoAcids() {
 		return aminoAcids;
 	}
 	
@@ -222,8 +460,15 @@ public class BcePredService extends Service {
 		this.selectAll = true;
 	}
 	
+	public static void printArray(String[]array) {
+		for(String s: array) {
+			System.out.println(s);
+		}
+	}
+	
 	public static void main (String[]args) {
-		BcePredService bps = new BcePredService("Q99523");
+		BcePredService bps = new BcePredService("Q99523","1.9","2.3","1.9","1.9","1.8","2.4","2","2");
+				
 		//bps.setSelectAccess(true);
 		bps.setSelectAll();
 		bps.run();
