@@ -19,8 +19,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.jsoup.Jsoup;	
+import org.jsoup.Jsoup;
 
+import epiprot.View.Header;
 import epiprot.services.sifts.PdbEntry;
 import epiprot.services.ssp.JPredAminoAcid;
 import epiprot.services.ssp.JPredSequenceTooLongException;
@@ -84,6 +85,9 @@ public class Presenter {
 	    
 	    JMenuItem clearPanes();
 	    
+	    JMenuItem openItem();
+	    ArrayList<Header> headers();
+	    
 	    void insertLine(String id, String header, String line, int headerPosition, int editorPosition);
 	    void insertLineMiddle(String header, String line);
 	    void insertLineAboveTarget(String header, String line);
@@ -97,6 +101,7 @@ public class Presenter {
 		void proteinAcc(String proteinAcc);	
 		
 		void reloadDocument();
+		void openDocument();
 	}
 	
 	public interface Model {
@@ -118,6 +123,24 @@ public class Presenter {
 	public void bindHandlers() {
 		
 		//toolbar buttons
+		view.openItem().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.openDocument();
+				ArrayList<Header> headers = view.headers();
+				for(Header header:headers) {
+					if(!header.getId().equals(header.getName())) {
+						protein = new Protein(header.getId(),true);
+						proteinAcc = header.getId();
+						view.proteinAcc(header.getId());
+						view.searchField().setText(header.getId());
+						System.out.println("**sequence:"+protein.getSequence());
+						break;
+					}
+				}
+			}
+		});
+		
 		view.searchButton().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
