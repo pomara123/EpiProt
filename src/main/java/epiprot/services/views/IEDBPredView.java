@@ -29,7 +29,7 @@ import javax.swing.JButton;
 public class IEDBPredView extends JFrame implements IEDBPredPresenter.View {
 	
 	JTextField windowSizeTextField = new JTextField("6");
-	JCheckBox bepipredCheckBox = new JCheckBox("Bepipred Linear Epitope Prediction");
+	//JCheckBox bepipredCheckBox = new JCheckBox("Bepipred Linear Epitope Prediction");
 	JCheckBox chouCheckBox = new JCheckBox("Chou & Fasman Beta-Turn Prediction");
 	JCheckBox eminiNewCheckBox = new JCheckBox("Emini Surface Accessibility Prediction");
 	JCheckBox karplusCheckBox = new JCheckBox("Karplus & Schulz Flexibility Prediction");
@@ -47,7 +47,7 @@ public class IEDBPredView extends JFrame implements IEDBPredPresenter.View {
 		JPanel panel = new JPanel();
 		scrollPane.setViewportView(panel);
 		panel.setLayout(new GridBagLayout());
-		
+		/*
 		bepipredCheckBox.setHorizontalAlignment(SwingConstants.TRAILING);
 		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
 		gbc_chckbxNewCheckBox.insets = new Insets(5, 5, 5, 5);
@@ -57,7 +57,7 @@ public class IEDBPredView extends JFrame implements IEDBPredPresenter.View {
 		gbc_chckbxNewCheckBox.gridx = 0;
 		gbc_chckbxNewCheckBox.gridy = 0;
 		panel.add(bepipredCheckBox, gbc_chckbxNewCheckBox);
-		
+		*/
 		GridBagConstraints gbc_chckbxNewCheckBox_1 = new GridBagConstraints();
 		gbc_chckbxNewCheckBox_1.insets = new Insets(5, 5, 5, 0);
 		gbc_chckbxNewCheckBox_1.anchor = GridBagConstraints.WEST;
@@ -145,13 +145,13 @@ public class IEDBPredView extends JFrame implements IEDBPredPresenter.View {
 		// TODO Auto-generated method stub
 		return windowSizeTextField;
 	}
-
+/*
 	@Override
 	public JCheckBox bepipredCheckBox() {
 		// TODO Auto-generated method stub
 		return bepipredCheckBox;
 	}
-
+*/
 	@Override
 	public JCheckBox chouCheckBox() {
 		// TODO Auto-generated method stub

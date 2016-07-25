@@ -33,7 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
@@ -439,8 +438,8 @@ public class View extends JFrame implements Presenter.View, ActionListener {
     
     @Override
     public void insertLineMiddle(String header, String line) {
-    	insertNewLine(15,editorPane);
-    	insertNewLine(15,headerPane);
+    	insertNewLine(12,editorPane);
+    	insertNewLine(12,headerPane);
     	insertLine(proteinAcc,header,line,headerPane.getDocument().getLength(),editorPane.getDocument().getLength());
     }
     
