@@ -26,7 +26,7 @@ public class IEDBPredPresenter {
 	
 	interface View {
 		JTextField windowSizeTextField();
-		JCheckBox bepipredCheckBox();
+		//JCheckBox bepipredCheckBox();
 		JCheckBox chouCheckBox();
 		JCheckBox eminiNewCheckBox();
 		JCheckBox karplusCheckBox();
@@ -49,13 +49,14 @@ public class IEDBPredPresenter {
 		view.btnSubmit().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				// TODO Auto-generated method stub/
+				/*
 				if (view.bepipredCheckBox().isSelected()) {
 					BepipredPredictionService ps = new BepipredPredictionService(presenter.protein.getSequence());
 					ps.run();
 					ArrayList<IedbEpitopePredictionAminoAcid> aminoAcids = ps.getAminoAcids();
 					insertPredictionLine("Bepipred Epitope Prediction",presenter.getMainLine(), aminoAcids);
-				}
+				}*/
 				if (view.chouCheckBox().isSelected()) {
 					ChouPredictionService ps = new ChouPredictionService(presenter.protein.getSequence());
 					ps.run();

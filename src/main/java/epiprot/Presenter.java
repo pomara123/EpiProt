@@ -151,6 +151,7 @@ public class Presenter {
 					clearViews();
 					view.proteinAcc(proteinAcc);
 					insertLineMiddle(proteinAcc);
+					insertNumberLines();
 				}
 			}		
 		});
@@ -643,6 +644,23 @@ public class Presenter {
     public void deleteLineByProteinAcc(String proteinAcc) {
     	view.deleteLineByProteinAcc(proteinAcc);
     }
+    
+    private void insertNumberLines() {
+		String dashLine = "";
+		String numberLine = "";
+		for (int i = 1; i <= protein.getSequence().length(); i++) {
+			if(i%10 == 0) {
+				dashLine = dashLine + "|";
+				numberLine = numberLine + String.format("%1$10s", i);
+			}
+			else {
+				dashLine = dashLine + " ";
+			}
+		}
+		view.insertLineAboveTarget("dashLine", dashLine);
+		view.insertLineAboveTarget("numberLine", numberLine);
+	}
+	
     
     private class LineElement {
     	private char character;
