@@ -27,6 +27,7 @@ public class JPredAminoAcid extends AminoAcid {
 		this.confidenceScore = confidenceScore;
 	}
 	
+	@Override
 	public String toString() {
 		return "Conf: " + confidenceScore + " Pred: " + prediction + " AA: " + super.getResidue();
 	}

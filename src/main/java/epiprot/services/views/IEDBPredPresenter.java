@@ -11,7 +11,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import epiprot.Presenter;
-import epiprot.services.epitopePrediction.BepipredPredictionService;
 import epiprot.services.epitopePrediction.ChouPredictionService;
 import epiprot.services.epitopePrediction.EminiPredictionService;
 import epiprot.services.epitopePrediction.IedbEpitopePredictionAminoAcid;

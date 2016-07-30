@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import javax.swing.JCheckBox;
 
 import epiprot.Presenter;
-import epiprot.SelectProteinPresenter.View;
 import epiprot.services.sifts.PdbEntry;
-import epiprot.services.sifts.SiftAminoAcid;
 
 public class SelectPDBPresenter {
 	

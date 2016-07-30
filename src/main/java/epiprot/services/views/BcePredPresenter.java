@@ -500,6 +500,7 @@ public class BcePredPresenter {
 		public void setPositionInLine(int positionInLine) {
 			this.positionInLine = positionInLine;
 		}
+		@Override
 		public String toString() {
 			return character+"|"+color;
 		}
@@ -509,7 +510,8 @@ public class BcePredPresenter {
     	public String line;
     	public int position;
     	public ListPlusPosition(){}
-    	public String toString() {
+    	@Override
+		public String toString() {
     		return line+position;
     	}
     }

@@ -35,6 +35,7 @@ public class IedbEpitopePredictionService extends Service {
 	}
 	
 	//wrapper for getPredictionChart
+	@Override
 	public void run() {
     	String s = null;
     	chart = epitopePredictionMethod + " Prediction Chart\n";
@@ -114,7 +115,8 @@ public class IedbEpitopePredictionService extends Service {
     private ArrayList<IedbEpitopePredictionAminoAcid> calcDisplayedScores(ArrayList<IedbEpitopePredictionAminoAcid> aaList) {
     	ArrayList<IedbEpitopePredictionAminoAcid> sortedAAList = new ArrayList<IedbEpitopePredictionAminoAcid>(aaList);
     	Collections.sort(sortedAAList, new Comparator<IedbEpitopePredictionAminoAcid>(){
-    	     public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
+    	     @Override
+			public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
     	         if(o1.getScore() == o2.getScore())
     	             return 0;
     	         return o1.getScore() < o2.getScore() ? -1 : 1;
@@ -135,7 +137,8 @@ public class IedbEpitopePredictionService extends Service {
     	}
     	
     	Collections.sort(sortedAAList, new Comparator<IedbEpitopePredictionAminoAcid>(){
-   	     public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
+   	     @Override
+		public int compare(IedbEpitopePredictionAminoAcid o1, IedbEpitopePredictionAminoAcid o2){
    	         if(o1.getPosition() == o2.getPosition())
    	             return 0;
    	         return o1.getPosition() < o2.getPosition() ? -1 : 1;

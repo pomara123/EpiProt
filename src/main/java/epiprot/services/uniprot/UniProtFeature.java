@@ -35,6 +35,7 @@ public class UniProtFeature {
 
 	
 	
+	@Override
 	public String toString() {
 		return this.uniprotType+":position:"+this.position+":beginPosition:"+this.beginPosition+":endPosition:"+this.endPosition;
 	}

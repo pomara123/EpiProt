@@ -61,6 +61,7 @@ public class PhosphoSitePTM {
 		this.residueModification = residueModification;
 	}
 	
+	@Override
 	public String toString() {
 		return this.type+":h"+this.htpHits+":l"+this.ltpHits;
 	}

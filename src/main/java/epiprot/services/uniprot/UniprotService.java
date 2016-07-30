@@ -14,7 +14,6 @@ import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import epiprot.services.DocumentNullException;
 import epiprot.services.Service;
 
 public class UniprotService extends Service {
@@ -69,6 +68,6 @@ public class UniprotService extends Service {
 	
 	public static void main (String[]args) {
 		UniprotService uniprot = new UniprotService("Q99523");
-		System.out.println(uniprot.SERVICEFILEPATH);
+		System.out.println(Service.SERVICEFILEPATH);
 	}
 }

@@ -1,16 +1,13 @@
 package epiprot.services.views;
 
 import javax.swing.JFrame;
-import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.layout.FormSpecs;
-import java.awt.GridLayout;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.JButton;

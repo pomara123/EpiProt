@@ -27,6 +27,7 @@ public class DiscotopePredictionService extends Service{
 		this.chain = chain;
 	}
 	
+	@Override
 	public void run() {
 		try {
 			URL url = new URL("http://www.rcsb.org/pdb/files/"+pdbId+".pdb");

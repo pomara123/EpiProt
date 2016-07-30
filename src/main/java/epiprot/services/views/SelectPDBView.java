@@ -6,8 +6,6 @@ import java.awt.FlowLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import epiprot.SelectProteinPresenter;
-
 public class SelectPDBView extends JPanel implements SelectPDBPresenter.View {
 
 	private String proteinAcc;

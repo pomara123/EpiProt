@@ -3,7 +3,6 @@ package epiprot.services.views;
 import javax.swing.JFrame;
 import java.awt.Dimension;
 
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;

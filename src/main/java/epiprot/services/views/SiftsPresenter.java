@@ -1,6 +1,5 @@
 package epiprot.services.views;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -9,8 +8,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import epiprot.Presenter;
-import epiprot.Protein;
-import epiprot.SelectProteinView;
 import epiprot.services.sifts.PdbEntry;
 import epiprot.services.sifts.SiftAminoAcid;
 import epiprot.services.sifts.SiftService;
@@ -40,7 +37,7 @@ public class SiftsPresenter {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				System.out.println("test submit siftspresenter");
-				ArrayList<PdbEntry> pdbEntries = presenter.pdbEntryList;
+				ArrayList<PdbEntry> pdbEntries = Presenter.pdbEntryList;
 				for(PdbEntry pdbEntry: pdbEntries) {
 					SiftService siftService = new SiftService(pdbEntry.getPdbId(),pdbEntry.getProteinAcc(),pdbEntry.getResolution());
 					siftService.run();

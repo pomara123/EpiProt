@@ -43,6 +43,7 @@ public class ABCPredPeptide {
 		this.score = score;
 	}
 	
+	@Override
 	public String toString() {
 		return "Rank: " + rank + " Sequence: " + sequence + " start: " + start + " score: " + score;
 	}

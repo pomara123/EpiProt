@@ -1,7 +1,5 @@
 package epiprot.services.uniprot;
 
-import epiprot.services.phosphosite.PhosphoSiteService;
-
 public class UniProtPTM extends UniProtFeature{
 	
 	private String ptmType;
@@ -116,6 +114,7 @@ public class UniProtPTM extends UniProtFeature{
 		this.linkage = linkage;
 	}
 	
+	@Override
 	public String toString() {
 		return this.getPosition()+"|"+this.getBeginPosition()+"|"+this.getEndPosition()+"|"+this.getPtmType()+"|"+this.getLinkage();
 	}

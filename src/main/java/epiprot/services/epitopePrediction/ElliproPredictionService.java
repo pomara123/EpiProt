@@ -30,7 +30,8 @@ public class ElliproPredictionService extends Service{
 	}
 	
 	//starts the jar file
-    public void run() {
+    @Override
+	public void run() {
     	
         try {
             // using the Runtime exec method:
@@ -113,7 +114,7 @@ public class ElliproPredictionService extends Service{
     
     public static void main (String []args) {
     	ElliproPredictionService eps = new ElliproPredictionService("3OW4","A");
-    	System.out.println(eps.SERVICEFILEPATH);
+    	System.out.println(Service.SERVICEFILEPATH);
     	eps.run();
     	ArrayList<ElliproPredictionEpitope> epitopeList = eps.getEpitopeList();
     	for (ElliproPredictionEpitope epitope : epitopeList) {

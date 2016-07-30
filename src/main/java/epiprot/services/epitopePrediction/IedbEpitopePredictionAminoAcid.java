@@ -1,7 +1,5 @@
 package epiprot.services.epitopePrediction;
 
-import java.util.Comparator;
-
 import epiprot.AminoAcid;
 
 public class IedbEpitopePredictionAminoAcid extends AminoAcid {

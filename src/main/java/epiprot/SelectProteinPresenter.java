@@ -6,15 +6,17 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 
 public class SelectProteinPresenter {
-	
+
 	public interface View {
 		JCheckBox checkBox();
+
 		String getUniProtAcc();
+
 		void createUI();
 	}
-	
+
 	View view;
-	
+
 	void bindHandler() {
 		view.checkBox().addActionListener(new ActionListener() {
 			@Override
@@ -22,13 +24,12 @@ public class SelectProteinPresenter {
 				// TODO Auto-generated method stub
 				if (view.checkBox().isSelected()) {
 					Presenter.msaProteinList.add(view.getUniProtAcc());
-				}
-				else {
+				} else {
 					if (Presenter.msaProteinList.contains(view.getUniProtAcc())) {
-						Presenter.msaProteinList.remove(view.getUniProtAcc());	
+						Presenter.msaProteinList.remove(view.getUniProtAcc());
 					}
 				}
-			}		
+			}
 		});
 	}
 

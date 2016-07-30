@@ -1,7 +1,7 @@
 package epiprot;
 
 public class Line {
-	
+
 	private String header;
 	private String line;
 

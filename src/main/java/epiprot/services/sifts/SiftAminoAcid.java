@@ -72,6 +72,7 @@ public class SiftAminoAcid extends AminoAcid{
 		this.secondaryStructure = secondaryStructure;
 	}
 	
+	@Override
 	public String toString() {
 		return getResidue()+"|"+getPosition()+"|"+secondaryStructure;
 	}
