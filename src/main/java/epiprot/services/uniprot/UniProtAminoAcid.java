@@ -127,6 +127,7 @@ public class UniProtAminoAcid extends AminoAcid{
 		return ptmList;
 	}
 	
+	@Override
 	public String toString() {
 		String aa = this.getResidue()+"|"+this.getPosition();
 		for(UniProtPTM ptm : this.ptmList) {

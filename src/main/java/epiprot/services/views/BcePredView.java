@@ -3,7 +3,6 @@ package epiprot.services.views;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import java.awt.BorderLayout;

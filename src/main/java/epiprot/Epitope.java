@@ -3,7 +3,7 @@ package epiprot;
 import java.util.ArrayList;
 
 public class Epitope {
-	
+
 	private int start;
 	private int end;
 	private String residues;
@@ -44,7 +44,8 @@ public class Epitope {
 	public void setAminoAcidList(ArrayList<AminoAcid> aminoAcidList) {
 		this.aminoAcidList = aminoAcidList;
 	}
-	
+
+	@Override
 	public String toString() {
 		return aminoAcidList.toString();
 	}

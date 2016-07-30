@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+import javax.swing.SwingConstants;
 
 public class ProgressWindow extends JFrame {
 	
@@ -16,7 +17,7 @@ public class ProgressWindow extends JFrame {
 	
 	public void createUI() {
 	    //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    JProgressBar aJProgressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+	    JProgressBar aJProgressBar = new JProgressBar(SwingConstants.HORIZONTAL);
 	    aJProgressBar.setStringPainted(true);
 	    aJProgressBar.setIndeterminate(true);
 	    

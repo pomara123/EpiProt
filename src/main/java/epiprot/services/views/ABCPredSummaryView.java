@@ -1,23 +1,12 @@
 package epiprot.services.views;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-
-import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
-import javax.swing.JLabel;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.JCheckBox;
-
 import java.awt.BorderLayout;
-import java.awt.Component;
 
 public class ABCPredSummaryView extends JFrame implements ABCPredPresenter.SummaryView {
 

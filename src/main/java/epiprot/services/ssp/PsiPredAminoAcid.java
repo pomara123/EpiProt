@@ -27,6 +27,7 @@ public class PsiPredAminoAcid extends AminoAcid {
 		this.prediction = prediction;
 	}
 	
+	@Override
 	public String toString() {
 		return "Conf: " + confidenceScore + " Pred: " + prediction + " AA: " + super.getResidue();
 	}

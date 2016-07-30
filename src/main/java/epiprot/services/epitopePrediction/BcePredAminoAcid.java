@@ -120,6 +120,7 @@ public class BcePredAminoAcid extends AminoAcid {
 		this.average = average;
 	}
 	
+	@Override
 	public String toString() {
 		return "Res: "+super.getResidue()+super.getPosition()+" H: "+hydro+" F: "+ flexi+" A: "+ access+" T: "+ turns+" S: "+ surface+" P: "+ polar+" AP: "+ 
 				antiPro+" Max: "+ max+" Min: "+ min+" Avg: "+ average;

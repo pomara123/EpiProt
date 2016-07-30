@@ -172,7 +172,8 @@ public class BcePredService extends Service {
     	
 		if(selectHydro) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getHydro() == o2.getHydro())
 	    	             return 0;
 	    	         return o1.getHydro() < o2.getHydro() ? -1 : 1;
@@ -192,7 +193,8 @@ public class BcePredService extends Service {
 		
 		if(selectFlexi) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getFlexi() == o2.getFlexi())
 	    	             return 0;
 	    	         return o1.getFlexi() < o2.getFlexi() ? -1 : 1;
@@ -212,7 +214,8 @@ public class BcePredService extends Service {
 		
 		if(selectAccess) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getAccess() == o2.getAccess())
 	    	             return 0;
 	    	         return o1.getAccess() < o2.getAccess() ? -1 : 1;
@@ -232,7 +235,8 @@ public class BcePredService extends Service {
 		
 		if(selectTurns) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getTurns() == o2.getTurns())
 	    	             return 0;
 	    	         return o1.getTurns() < o2.getTurns() ? -1 : 1;
@@ -252,7 +256,8 @@ public class BcePredService extends Service {
     	
 		if(selectSurface) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getSurface() == o2.getSurface())
 	    	             return 0;
 	    	         return o1.getSurface() < o2.getSurface() ? -1 : 1;
@@ -272,7 +277,8 @@ public class BcePredService extends Service {
 		
 		if(selectPolar) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getPolar() == o2.getPolar())
 	    	             return 0;
 	    	         return o1.getPolar() < o2.getPolar() ? -1 : 1;
@@ -292,7 +298,8 @@ public class BcePredService extends Service {
 		
 		if(selectAntipro) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getAntiPro() == o2.getAntiPro())
 	    	             return 0;
 	    	         return o1.getAntiPro() < o2.getAntiPro() ? -1 : 1;
@@ -312,7 +319,8 @@ public class BcePredService extends Service {
 		
 		if(selectAntipro) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getAntiPro() == o2.getAntiPro())
 	    	             return 0;
 	    	         return o1.getAntiPro() < o2.getAntiPro() ? -1 : 1;
@@ -332,7 +340,8 @@ public class BcePredService extends Service {
 		
 		if(toInt(selectHydro)+toInt(selectFlexi)+toInt(selectAccess)+toInt(selectTurns)+toInt(selectSurface)+toInt(selectPolar)+toInt(selectAntipro) >= 2) {
 			Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getMax() == o2.getMax())
 	    	             return 0;
 	    	         return o1.getMax() < o2.getMax() ? -1 : 1;
@@ -350,7 +359,8 @@ public class BcePredService extends Service {
 	    	}
 	    	
 	    	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getMin() == o2.getMin())
 	    	             return 0;
 	    	         return o1.getMin() < o2.getMin() ? -1 : 1;
@@ -368,7 +378,8 @@ public class BcePredService extends Service {
 	    	}
 	    	
 	    	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
-	    	     public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
+	    	     @Override
+				public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 	    	         if(o1.getAverage() == o2.getAverage())
 	    	             return 0;
 	    	         return o1.getAverage() < o2.getAverage() ? -1 : 1;
@@ -387,6 +398,7 @@ public class BcePredService extends Service {
 		}
     	
     	Collections.sort(aminoAcids, new Comparator<BcePredAminoAcid>(){
+			@Override
 			public int compare(BcePredAminoAcid o1, BcePredAminoAcid o2){
 			    if(o1.getPosition() == o2.getPosition())
 			        return 0;

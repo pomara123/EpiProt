@@ -4,8 +4,6 @@ import javax.swing.JFrame;
 import java.awt.Dimension;
 import javax.swing.JPanel;
 
-import epiprot.SelectProteinView;
-
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;

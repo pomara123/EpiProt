@@ -2,9 +2,6 @@ package epiprot.services.views;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -13,14 +10,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import epiprot.Presenter;
-import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.AlignmentCutoffOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DatabaseOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.DropOffOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ExpectationOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.FilterOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.MatrixOption;
 import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.ScoreCutoffOption;
-import uk.ac.ebi.uniprot.dataservice.client.alignment.blast.input.SequenceTypeOption;
 
 public class BlastPresenter {
 	

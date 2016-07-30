@@ -127,6 +127,7 @@ public class PhosphoSiteAminoAcid extends AminoAcid{
 		return ptmList;
 	}
 	
+	@Override
 	public String toString() {
 		String aa = this.getResidue()+"|"+this.getPosition();
 		for(PhosphoSitePTM ptm : this.ptmList) {

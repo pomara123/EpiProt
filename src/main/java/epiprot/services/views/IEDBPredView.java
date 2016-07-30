@@ -10,20 +10,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-
 import javax.swing.JPanel;
-import java.awt.GridLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.util.ArrayList;
-import java.awt.Component;
-import javax.swing.SwingConstants;
 import javax.swing.JButton;
 
 public class IEDBPredView extends JFrame implements IEDBPredPresenter.View {
